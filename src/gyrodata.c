@@ -7,7 +7,10 @@ static const char GYRO_LABEL[] = "BMG160 Gyroscope";
 static void FillGyroData(SensorData* data, Gyroscope_XyzData_T* meas)
 {
     data->numMeas = 1;
-    snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "gyro");
+
+    // The former meaning of this value was "gyro", as shown below; it has been modified to comply with the model
+    // snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "gyro");
+    snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "angularSpeed");
 
     snprintf(data->meas[0].value,
              SENSOR_VALUE_SIZE,

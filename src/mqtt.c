@@ -126,11 +126,22 @@ MqttErrorCode MqttConnect(void)
     return ret;
 }
 
+// The path has been removed to comply with the model; it can be added if necessary, as shown below
+/*
 static size_t SerializeData(NameValue* data, char* msg)
 {
     return sprintf(msg,
                    "{\"meaning\":\"%s\",\"path\":\"%s\",\"value\":%s}",
                    data->name,
+                   data->name,
+                   data->value);
+}
+*/
+
+static size_t SerializeData(NameValue* data, char* msg)
+{
+    return sprintf(msg,
+                   "{\"meaning\":\"%s\",\"value\":%s}",
                    data->name,
                    data->value);
 }

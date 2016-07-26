@@ -9,7 +9,7 @@
 # The default value "../../../.." assumes that this makefile is placed in the
 # folder xdk110/apps/<App Folder>/make where the BCDS_BASE_DIR is the parent of
 # the xdk110 folder.
-BCDS_BASE_DIR ?= $(XDK_SDK)
+BCDS_BASE_DIR ?= C:/XDK-Workbench/SDK
 
 export BCDS_SYSTEM_STARTUP_METHOD = DEFAULT_STARTUP
 export BCDS_APP_NAME = relayrxdk
@@ -69,13 +69,13 @@ CREDENTIALS_JSON = $(BCDS_APP_DIR)/src/credentials.json
 CREDENTIALS_HEADER = $(BCDS_APP_DIR)/inc/credentials.h
 MQTT_SERVER = mqtt.relayr.io
 MQTT_PORT = 1883
-SSID = <PUT_YOUR_WIFI_SSID_HERE!
-PASS = <PUT_YOUR_WIFI_PASS_HERE!
+SSID = relayr24
+PASS = "wearsimaspants"
 XDK_APP_ADDRESS = 0x00010000
 BCDS_DEVICE_ID = EFM32GG390F1024
 OPENOCD = openocd
 OOCDINTERFACE = $(XDK_OCD_INTERFACE)
-PYTHON_EXE = python
+PYTHON_EXE = C:/Python27/python.exe
 
 .PHONY: all clean flashocd flashsegger debug release
 

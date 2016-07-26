@@ -8,7 +8,10 @@ static const char LIGHT_SENSOR_LABEL[] = "MAX09 Light Sensor";
 static void FillLightData(SensorData* data, uint32_t meas)
 {
     data->numMeas = 1;
-    snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "light");
+
+    // The former meaning of this value was "light", as shown below; it has been modified to comply with the model
+    // snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "light");
+    snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "luminosity");
 
     snprintf(data->meas[0].value,
              SENSOR_VALUE_SIZE,
