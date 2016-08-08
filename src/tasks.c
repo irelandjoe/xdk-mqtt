@@ -12,11 +12,11 @@ static void MqttSubscriptionTask(void* context);
 static void WifiConnectionCallback(int status);
 static void WifiReconnect(void* context);
 
-OS_taskHandle_tp tickTaskHandle = NULL;
-static OS_taskHandle_tp commandTaskHandle;
-static OS_taskHandle_tp reconnectTaskHandle;
-static OS_taskHandle_tp subscriptionTaskHandle;
-static OS_taskHandle_tp wifiReconnectHandle;
+xTaskHandle* tickTaskHandle = NULL;
+static xTaskHandle* commandTaskHandle;
+static xTaskHandle* reconnectTaskHandle;
+static xTaskHandle* subscriptionTaskHandle;
+static xTaskHandle* wifiReconnectHandle;
 
 static uint32_t PUBLISH_PERIOD = 3000;
 static const uint32_t COMMAND_PERIOD = 1000;
@@ -31,12 +31,12 @@ static bool wifiConnected = false;
 void TickInit(void)
 {
     WDOG_Feed();
-    int8_t retValPerSwTimer = OS_ERR_NOT_ENOUGH_MEMORY;
-    retValPerSwTimer = OS_taskCreate(Tick,
-                                     (const int8_t *) "PublishData",
-                                     TASK_STACK_SIZE,
-                                     TASK_PRIO - 2,
-                                     tickTaskHandle);
+    int8_t retValPerSwTimer = errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
+    retValPerSwTimer = xTaskCreate(Tick,
+                                   (const int8_t *) "PublishData",
+                                   TASK_STACK_SIZE,
+                                   TASK_PRIO - 2,
+                                   tickTaskHandle);
 
     if(OS_ERR_NO_ERROR != retValPerSwTimer)
     {
@@ -59,7 +59,7 @@ static void Tick(void* context)
         if(killTick)
         {
             killTick = false;
-            OS_taskDelete(NULL);
+            vTaskDelete(NULL);
         }
 
         context = context;
@@ -78,7 +78,7 @@ static void Tick(void* context)
                     if(0 > MqttSendData(&data.meas[meas]))
                     {
                         // TODO: Check why taskDelete/taskSuspend deletes/suspens __current__ thread
-                        // OS_taskDelete(commandTaskHandle);
+                        // vTaskDelete(commandTaskHandle);
                         MqttStopPolling();
                         printf("Sending data FAILED! Restarting WiFi and MQTT!\n");
                         Restart();
@@ -91,17 +91,17 @@ static void Tick(void* context)
                 }
             }
         }
-        OS_taskDelay(PUBLISH_PERIOD);
+        vTaskDelay(PUBLISH_PERIOD);
     }
 }
 
 void Restart(void)
 {
     WDOG_Feed();
-    OS_taskDelete(commandTaskHandle);
-    OS_taskDelete(reconnectTaskHandle);
-    OS_taskDelete(subscriptionTaskHandle);
-    OS_taskDelete(wifiReconnectHandle);
+    vTaskDelete(commandTaskHandle);
+    vTaskDelete(reconnectTaskHandle);
+    vTaskDelete(subscriptionTaskHandle);
+    vTaskDelete(wifiReconnectHandle);
     MqttDeinit();
     printf("WiFi deinit = %d\n\r", WiFiDeinit());
     wifiConnected = false;
@@ -155,14 +155,14 @@ void WifiReconnect(void* context)
         WDOG_Feed();
         if(wifiConnected)
         {
-            OS_taskDelete(NULL);
+            vTaskDelete(NULL);
         }
         context = context;
-        OS_taskDelay(RECONNECT_PERIOD);
+        vTaskDelay(RECONNECT_PERIOD);
         WDOG_Feed();
         if(0 == WiFiInit(&WifiConnectionCallback))
         {
-            OS_taskDelete(NULL);
+            vTaskDelete(NULL);
         }
     }
 }
@@ -215,7 +215,7 @@ static void MqttConnectionTask(void* context)
             if(0 == MqttInit())
             {
                 MqttSubscriptionInit();
-                OS_taskDelete(NULL);
+                vTaskDelete(NULL);
             }
             else
             {
@@ -223,7 +223,7 @@ static void MqttConnectionTask(void* context)
                 Restart();
             }
         }
-        OS_taskDelay(RECONNECT_PERIOD);
+        vTaskDelay(RECONNECT_PERIOD);
     }
 }
 
@@ -240,7 +240,7 @@ static void MqttSubscriptionTask(void* context)
             {
                 TickInit();
                 CommandHandlerInit();
-                OS_taskDelete(NULL);
+                vTaskDelete(NULL);
             }
             else
             {
@@ -248,6 +248,6 @@ static void MqttSubscriptionTask(void* context)
                 Restart();
             }
         }
-        OS_taskDelay(RECONNECT_PERIOD);
+        vTaskDelay(RECONNECT_PERIOD);
     }
 }

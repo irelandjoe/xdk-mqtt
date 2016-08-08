@@ -2,9 +2,10 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include "OS_operatingSystem_ih.h"
+#include <FreeRTOS.h>
+#include <task.h>
 
-extern OS_taskHandle_tp tickTaskHandle;
+extern xTaskHandle* tickTaskHandle;
 
 void TickInit(void);
 void TickKill(void);

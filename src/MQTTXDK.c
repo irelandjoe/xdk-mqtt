@@ -13,7 +13,7 @@
 
 static const int32_t TIMER_TICK_PERIOD = 10;
 static unsigned long MilliTimer = 0;
-static OS_timerHandle_tp sysTickIntHandle = NULL;
+static xTimerHandle* sysTickIntHandle = NULL;
 
 void sysTickIntHandler(void *pvParameters)
 {

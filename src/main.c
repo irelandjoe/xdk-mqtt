@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "OS_operatingSystem_ih.h"
+#include <FreeRTOS.h>
+#include <timers.h>
 #include "XdkSystemStartup.h"
 #include "mqtt.h"
 
@@ -43,7 +44,7 @@ int main(void)
     systemStartup();
 }
 
-void appInitSystem(OS_timerHandle_tp xTimer)
+void appInitSystem(xTimerHandle* xTimer)
 {
     (void) (xTimer);
     LedInit();

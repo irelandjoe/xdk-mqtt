@@ -6,7 +6,7 @@
 #include "Serval_Ip.h"
 #include "BCDS_WlanConnect.h"
 #include "BCDS_NetworkConfig.h"
-#include "OS_operatingSystem_ih.h"
+#include <FreeRTOS.h>
 #include "em_wdog.h"
 
 // auto generated file with credentials

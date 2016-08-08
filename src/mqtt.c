@@ -4,7 +4,8 @@
 
 #include "mqtt.h"
 #include "MQTTClient.h"
-#include "OS_operatingSystem_ih.h"
+#include <FreeRTOS.h>
+#include <task.h>
 
 // auto generated file with credentials
 #include "credentials.h"
@@ -81,12 +82,12 @@ void MqttYield(void* context)
         if(deletePolling)
         {
             // Note: This kills the thread.
-            OS_taskDelete(NULL);
+            vTaskDelete(NULL);
         }
         context = context;
         printf("Polling MQTT command queue\n");
         MQTTYield(&mqttClient, MQTT_YIELD_TIMEOUT);
-        OS_taskDelay(pollingPeriod);
+        vTaskDelay(pollingPeriod);
     }
 }
 
