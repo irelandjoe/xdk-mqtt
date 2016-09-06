@@ -7,6 +7,7 @@
 #include "mqtt.h"
 #include <FreeRTOS.h>
 #include <task.h>
+#include <timers.h>
 
 typedef void(*CommandHandle)(const char* json, jsmntok_t* command, jsmntok_t* val);
 
@@ -18,7 +19,7 @@ void SensorControl(const char* json, jsmntok_t* command, jsmntok_t* val);
 static jsmn_parser parser;
 static jsmntok_t tokens[MAX_TOKENS];
 static CommandHandle handlers[] = {&LedControl, &PeriodControl, &SensorControl};
-extern xTaskHandle* tickTaskHandle;
+extern xTaskHandle tickTaskHandle;
 
 bool IsName(const char* expectedName, const char* name, int len)
 {
@@ -132,7 +133,8 @@ void PeriodControl(const char* json, jsmntok_t* command, jsmntok_t* val)
     {
         if(IsName("pub", json + command->start, 3))
         {
-            OS_timerChangePeriod(tickTaskHandle, value);
+        	xTimerChangePeriod(tickTaskHandle, value, 100);
+
         }
         else if(IsName("sub", json + command->start, 3))
         {

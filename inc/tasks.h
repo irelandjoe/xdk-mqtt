@@ -5,7 +5,7 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-extern xTaskHandle* tickTaskHandle;
+extern xTaskHandle tickTaskHandle;
 
 void TickInit(void);
 void TickKill(void);

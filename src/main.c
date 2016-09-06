@@ -18,10 +18,10 @@
 #include "leds.h"
 #include "wifi.h"
 #include "xdkbutton.h"
+#include "em_wdog.h"
 
 #include "tasks.h"
 #include "controls.h"
-#include "em_wdog.h"
 
 SensorGetter sensors[] = {&EnvSensorGetData,
                           &AccelGetData,
@@ -44,7 +44,7 @@ int main(void)
     systemStartup();
 }
 
-void appInitSystem(xTimerHandle* xTimer)
+void appInitSystem(xTimerHandle xTimer)
 {
     (void) (xTimer);
     LedInit();
