@@ -6,9 +6,12 @@
 #include "MQTTClient.h"
 #include <FreeRTOS.h>
 #include <task.h>
+#include "processcheck_task.h"
 
 // auto generated file with credentials
 #include "credentials.h"
+
+#include "logging.h"
 
 static MqttErrorCode MqttConnect(void);
 static size_t SerializeData(NameValue* data, char* msg);
@@ -27,18 +30,19 @@ static int32_t MQTT_YIELD_TIMEOUT = 50;
 
 int MqttInit(void)
 {
-    printf("Mqtt Init\n");
+	DEBUG_PRINT("Mqtt Init");
+
     MqttErrorCode returnValue = FAILURE;
     NewNetwork(&mqttNet);
     returnValue = MqttConnect();
     if(SUCCESS == returnValue)
     {
-        printf("Mqtt Success\n");
+        DEBUG_PRINT("Mqtt Success");
         deletePolling = false;
     }
     else
     {
-        printf("Mqtt initialization Failed\n");
+        ERR_PRINT("Mqtt initialization Failed");
     }
 
     return returnValue;
@@ -51,7 +55,7 @@ int MqttReconnect(void)
 
 void MqttDeinit(void)
 {
-    printf("Mqtt disconnect!\n");
+	DEBUG_PRINT("Mqtt disconnect!");
     mqttNet.disconnect(&mqttNet);
 }
 
@@ -64,28 +68,25 @@ int MqttSendData(NameValue* data)
     msg.payload = msgBuff;
     msg.payloadlen = SerializeData(data, msgBuff);
     int ret = MQTTPublish(&mqttClient, MQTT_TOPIC"data", &msg);
-    printf("Mqtt Sent :: %d %d\n", ret, msg.payloadlen);
+
     return ret;
 }
 
 int MqttSubscribe(messageHandler callback)
 {
-    int ret = MQTTSubscribe(&mqttClient, "/v1/"MQTT_USER"/cmd", QOS0, callback);
-    printf("MqttSubscribe:: %s %d\n", "/v1/"MQTT_USER"/cmd", ret);
+    int ret = MQTTSubscribe(&mqttClient, MQTT_TOPIC "cmd", QOS0, callback);
+
+    DEBUG_PRINT("MqttSubscribe:: %s %d", MQTT_TOPIC "cmd", ret);
+
     return ret;
 }
 
 void MqttYield(void* context)
 {
+	context = context;
     for (;;)
     {
-        if(deletePolling)
-        {
-            // Note: This kills the thread.
-            vTaskDelete(NULL);
-        }
-        context = context;
-        printf("Polling MQTT command queue\n");
+        ProcessCheck_ControlFlag(xTaskGetCurrentTaskHandle());
         MQTTYield(&mqttClient, MQTT_YIELD_TIMEOUT);
         vTaskDelay(pollingPeriod);
     }
@@ -108,7 +109,7 @@ MqttErrorCode MqttConnect(void)
 
         data.keepAliveInterval = 10;
         data.cleansession = 1;
-        printf("Connecting to %s %d with user: %s, ps: %s\n",
+        DEBUG_PRINT("Connecting to %s %d with user: %s, ps: %s",
                 MQTT_SERVER,
                 MQTT_SERVER_PORT,
                 MQTT_USER,
@@ -117,12 +118,14 @@ MqttErrorCode MqttConnect(void)
         ret = MQTTConnect(&mqttClient, &data);
         if(SUCCESS == ret)
         {
-            printf("Connected %d\n", ret);
+        	DEBUG_PRINT("Connected %d", ret);
         }
         else
         {
-            printf("Mqtt Connection failed!\n");
+        	ERR_PRINT("Mqtt Connection failed!");
         }
+    } else {
+    	ERR_PRINT("Connect network failed - %d", ret);
     }
     return ret;
 }

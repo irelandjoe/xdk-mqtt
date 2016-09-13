@@ -8,12 +8,17 @@
 #include "MQTTXDK.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "OS_operatingSystem_ih.h"
+#include <FreeRTOS.h>
+#include <projdefs.h>
+#include <timers.h>
+#include "simplelink.h"
+
+#include "logging.h"
 
 
 static const int32_t TIMER_TICK_PERIOD = 10;
 static unsigned long MilliTimer = 0;
-static xTimerHandle* sysTickIntHandle = NULL;
+static xTimerHandle sysTickIntHandle = NULL;
 
 void sysTickIntHandler(void *pvParameters)
 {
@@ -122,33 +127,31 @@ int ConnectNetwork(Network* net, int8_t* addr, int port)
     net->my_socket = sl_Socket(SL_AF_INET,SL_SOCK_STREAM, 0);
     if(net->my_socket < 0)
     {
-        printf("Failed to open socket!\n\r");
+        ERR_PRINT("Failed to open socket! - %d", net->my_socket);
         return -1;
     }
 
     retVal = sl_Connect(net->my_socket, ( SlSockAddr_t *)&sAddr, addrSize);
     if(retVal < 0)
     {
-        printf("Failed to connect to socket!\n\r");
+    	ERR_PRINT("Failed to connect to socket!");
         sl_Close(net->my_socket);
         return retVal;
     }
 
-    sysTickIntHandle = OS_timerCreate((const int8_t *) "MqttTimer",
+    sysTickIntHandle = xTimerCreate((const char *) "MqttTimer",
                                       TIMER_TICK_PERIOD,
-                                      OS_AUTORELOAD_ON,
-                                      NULL,
+                                      pdTRUE,
+                                      0,
                                       sysTickIntHandler);
 
     if(NULL == sysTickIntHandle)
     {
-        printf("Not enough memory to create MQTT Timer!");
-    }
-
-    retVal = OS_timerStart(sysTickIntHandle, 0xFFFF);
-    if(OS_ERR_NOT_ENOUGH_MEMORY == retVal)
+    	ERR_PRINT("Not enough memory to create MQTT Timer!");
+    } else if(pdFAIL == xTimerStart(sysTickIntHandle, 0xFFFF))
     {
-        printf("Not enough memory to start MQTT Timer!");
+    	ERR_PRINT("Not enough memory to start MQTT Timer!");
+        sl_Close(net->my_socket);
     }
 
     return retVal;

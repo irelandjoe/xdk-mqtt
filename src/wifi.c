@@ -8,20 +8,19 @@
 #include "BCDS_NetworkConfig.h"
 #include <FreeRTOS.h>
 #include "em_wdog.h"
+#include "logging.h"
 
 // auto generated file with credentials
 #include "credentials.h"
 
-void WifiConnectedCallback(WLI_connectStatus_t connectStatus);
-
 static int wifiInitDone = 0;
-static WifiCallback externCallback = NULL;
 
-int WiFiInit(WifiCallback callback)
+int WiFiInit()
 {
-    externCallback = callback;
     WDOG_Feed();
-    printf("WiFi Init\r\n");
+
+    DEBUG_PRINT("WiFi Init");
+
     int retVal = -1;
     NCI_ipSettings_t myIpSettings;
     memset(&myIpSettings, (uint32_t) 0, sizeof(myIpSettings));
@@ -33,13 +32,13 @@ int WiFiInit(WifiCallback callback)
 
     if(0 == wifiInitDone && WLI_SUCCESS != WLI_init())
     {
-        printf("Error occurred initializing WLAN \r\n ");
+    	ERR_PRINT("Error occurred initializing WLAN");
         return retVal;
     }
 
     wifiInitDone = 1;
 
-    printf("Connecting to: %s\r\n ", WLAN_CONNECT_WPA_SSID);
+    DEBUG_PRINT("Connecting to: %s", WLAN_CONNECT_WPA_SSID);
 
     connectSSID = (WLI_connectSSID_t) WLAN_CONNECT_WPA_SSID;
     connectPassPhrase = (WLI_connectPassPhrase_t) WLAN_CONNECT_WPA_PASS;
@@ -50,15 +49,12 @@ int WiFiInit(WifiCallback callback)
         NCI_getIpSettings(&myIpSettings);
         *IpaddressHex = Basics_htonl(myIpSettings.ipV4);
         (void)Ip_convertAddrToString(IpaddressHex,(char *)&ipAddressMy);
-        printf("Connected to WPA network successfully. \r\n ");
-        printf(" Ip address of the device: %s \r\n ",ipAddressMy);
-        externCallback(0);
+        DEBUG_PRINT("Connected - Ip address of the device: %s",ipAddressMy);
         retVal = 0;
     }
     else
     {
-        printf("Error occurred connecting %s \r\n ",WLAN_CONNECT_WPA_SSID);
-        return retVal;
+        ERR_PRINT("Error occurred connecting %s",WLAN_CONNECT_WPA_SSID);
     }
 
     return retVal;
@@ -66,7 +62,7 @@ int WiFiInit(WifiCallback callback)
 
 int WiFiDeinit(void)
 {
-    printf("WiFi disconnect!\n");
+	DEBUG_PRINT("WiFi disconnect!");
     return WLI_disconnect(NULL);
 }
 
@@ -82,26 +78,6 @@ void WiFiPrintIP(void)
     int8_t ipAddressMy[15] = {0};
     (void)Ip_convertAddrToString(IpaddressHex,(char *)&ipAddressMy);
 
-    printf("IP address of the device: %s \r\n ", ipAddressMy);
+    DEBUG_PRINT("IP address of the device: %s", ipAddressMy);
 }
 
-void WifiConnectedCallback(WLI_connectStatus_t connectStatus)
-{
-    int ret = 0;
-    WDOG_Feed();
-    printf("WiFi callback with status = %d\r\n", (int)connectStatus);
-    if(WLI_CONNECTED == connectStatus)
-    {
-        printf("Connected to WPA network successfully. \r\n ");
-    }
-    else
-    {
-        printf("Error occurred connecting %s \r\n ", WLAN_CONNECT_WPA_SSID);
-        ret = -1;
-    }
-
-    if(NULL != externCallback)
-    {
-        externCallback(ret);
-    }
-}

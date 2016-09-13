@@ -7,6 +7,9 @@
 #include "mqtt.h"
 #include <FreeRTOS.h>
 #include <task.h>
+#include <timers.h>
+
+#include "logging.h"
 
 typedef void(*CommandHandle)(const char* json, jsmntok_t* command, jsmntok_t* val);
 
@@ -18,7 +21,7 @@ void SensorControl(const char* json, jsmntok_t* command, jsmntok_t* val);
 static jsmn_parser parser;
 static jsmntok_t tokens[MAX_TOKENS];
 static CommandHandle handlers[] = {&LedControl, &PeriodControl, &SensorControl};
-extern xTaskHandle* tickTaskHandle;
+extern int tickPeriod;
 
 bool IsName(const char* expectedName, const char* name, int len)
 {
@@ -70,7 +73,7 @@ extern void CommandConfigHandler(MessageData* data)
     }
     else
     {
-        printf("Unknown command received: %s %d/%d/%d/%d\n\r",
+    	WARN_PRINT("Unknown command received: %s %d/%d/%d/%d",
                commandJson,
                numTokens,
                handleSelector,
@@ -96,7 +99,7 @@ void LedControl(const char* json, jsmntok_t* command, jsmntok_t* val)
     }
     else if(0 != value)
     {
-        printf("Unknown led op = %d\n\r", value);
+    	WARN_PRINT("Unknown led op = %d", value);
         return;
     }
 
@@ -116,7 +119,7 @@ void LedControl(const char* json, jsmntok_t* command, jsmntok_t* val)
     }
     else
     {
-        printf("Unknown led color = %s\n\r", json + command->start);
+        WARN_PRINT("Unknown led color = %s", json + command->start);
         return;
     }
 
@@ -132,7 +135,7 @@ void PeriodControl(const char* json, jsmntok_t* command, jsmntok_t* val)
     {
         if(IsName("pub", json + command->start, 3))
         {
-            OS_timerChangePeriod(tickTaskHandle, value);
+        	tickPeriod = value;
         }
         else if(IsName("sub", json + command->start, 3))
         {
@@ -140,12 +143,12 @@ void PeriodControl(const char* json, jsmntok_t* command, jsmntok_t* val)
         }
         else
         {
-            printf("Unknown period = %d\n\r", value);
+        	WARN_PRINT("Unknown period = %d", value);
         }
     }
     else
     {
-        printf("Wrong meas period = %d\n\r", value);
+    	WARN_PRINT("Wrong meas period = %d", value);
     }
 }
 
@@ -178,11 +181,11 @@ void SensorControl(const char* json, jsmntok_t* command, jsmntok_t* val)
         }
         else
         {
-            printf("Unknown sensor: %s\n\r", json + command->start);
+        	WARN_PRINT("Unknown sensor: %s", json + command->start);
         }
     }
     else
     {
-        printf("Wrong sensor setting = %d\n\r", value);
+    	WARN_PRINT("Wrong sensor setting = %d", value);
     }
 }

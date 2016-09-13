@@ -20,8 +20,13 @@
 #include "xdkbutton.h"
 
 #include "tasks.h"
+#include "processcheck_task.h"
 #include "controls.h"
-#include "em_wdog.h"
+#include "xdkwdog.h"
+#include "logging.h"
+
+#include "URU_usbResetUtility_ih.h"
+
 
 SensorGetter sensors[] = {&EnvSensorGetData,
                           &AccelGetData,
@@ -37,16 +42,17 @@ bool enabledSensors[] = {true, // Env Sensor
                         };
 
 void ButtonOneCallback(void *handle, uint32_t userParameter);
-void WDogInit(void);
+
 
 int main(void)
 {
     systemStartup();
 }
 
-void appInitSystem(xTimerHandle* xTimer)
+void appInitSystem(xTimerHandle xTimer)
 {
     (void) (xTimer);
+    ProcessCheck_Init();
     LedInit();
     ButtonOneInit(&ButtonOneCallback);
     MagnetoInit();
@@ -54,46 +60,25 @@ void appInitSystem(xTimerHandle* xTimer)
     LightInit();
     AccelInit();
     EnvSensorInit();
-    WDogInit();
-    WifiConnectInit();
-    MqttConnectInit();
+    XdkWDog_Init();
+    Tasks_init();
 }
 
 void ButtonOneCallback(void *handle, uint32_t userParameter)
 {
-    printf("Button %d pressed\n\r", (int)userParameter);
+    TRACE_PRINT("Button %d pressed", (int)userParameter);
 
     if(IsButtonPressed(handle))
     {
-        printf("Button pressed!\n");
+    	TRACE_PRINT("Button pressed!");
         LedSet(RED_LED, LED_SET_ON);
     }
 
     if(IsButtonReleased(handle))
     {
-        printf("Button released!\n");
+    	TRACE_PRINT("Button released!");
         LedSet(RED_LED, LED_SET_OFF);
-        MqttStopPolling();
-        TickKill();
-        Restart();
+        Tasks_restart();
     }
 }
 
-void WDogInit(void)
-{
-    WDOG_Init_TypeDef wdConfig = { false,              /* Do not Start watchdog when init done */
-                                   false,              /* WDOG not counting during debug halt */
-                                   false,              /* WDOG not counting when in EM2 */
-                                   false,              /* WDOG not counting when in EM3 */
-                                   false,              /* EM4 can be entered */
-                                   false,              /* Do not block disabling LFRCO/LFXO in CMU */
-                                   false,              /* Do not lock WDOG configuration (if locked, reset needed to unlock) */
-                                   wdogClkSelLFXO,     /* Select 32768HZ LFXO as clock source for WDOG oscillator */
-                                   wdogPeriod_256k     /* Set longest possible timeout period */
-                                };
-    printf("Initializing Watch Dog\n");
-    WDOG_Init(&wdConfig);
-    printf("Turning on Watch Dog\n");
-    WDOG_Enable(true);
-    printf("Watch Dog ON\n");
-}

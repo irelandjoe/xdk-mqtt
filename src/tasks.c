@@ -5,249 +5,190 @@
 #include "mqtt.h"
 #include "wifi.h"
 #include "controls.h"
+#include <FreeRTOS.h>
+#include <projdefs.h>
+#include <semphr.h>
+#include <timers.h>
+#include <queue.h>
+#include "processcheck_task.h"
+#include "logging.h"
 
-static void Tick(void* context);
-static void MqttConnectionTask(void* context);
-static void MqttSubscriptionTask(void* context);
-static void WifiConnectionCallback(int status);
-static void WifiReconnect(void* context);
+#define PUBLISH_PERIOD  3000;
+#define MQTT_CONN_MAX_FAILS	5
 
-xTaskHandle* tickTaskHandle = NULL;
-static xTaskHandle* commandTaskHandle;
-static xTaskHandle* reconnectTaskHandle;
-static xTaskHandle* subscriptionTaskHandle;
-static xTaskHandle* wifiReconnectHandle;
 
-static uint32_t PUBLISH_PERIOD = 3000;
-static const uint32_t COMMAND_PERIOD = 1000;
+static uint8_t Tick(void);
+static void Tasks_stateMachine(void *context);
+static void Tasks_Uptime(void *params);
+
+static xTaskHandle mqttYieldTaskHandle;
+static xTaskHandle mainTaskHandle;
+
+static xTimerHandle sysTickIntHandle = NULL;
+static SemaphoreHandle_t xSemaphore;
+
+
+static uint8_t restart = 0;
+static uint32_t uptime = 0;
+
 static const uint32_t RECONNECT_PERIOD = 4000;
-static const uint32_t PUBLISH_BLOCK_TIME = 0xffff;
-static const uint32_t TASK_STACK_SIZE = 1000;
+static const uint32_t TASK_STACK_SIZE = 8000;
 static const uint32_t TASK_PRIO = 4;
 
-static bool killTick = false;
-static bool wifiConnected = false;
+int tickPeriod = PUBLISH_PERIOD;
 
-void TickInit(void)
+void Tasks_init(void)
 {
-    WDOG_Feed();
-    int8_t retValPerSwTimer = errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
-    retValPerSwTimer = xTaskCreate(Tick,
-                                   (const int8_t *) "PublishData",
-                                   TASK_STACK_SIZE,
-                                   TASK_PRIO - 2,
-                                   tickTaskHandle);
+    xSemaphore = xSemaphoreCreateMutex();
 
-    if(OS_ERR_NO_ERROR != retValPerSwTimer)
-    {
-        printf("Not enough memory to start Tick Timer!");
-        return;
-    }
-    printf("Tick Init Success!\n\r");
+    TASK_CREATE_WITHCHECK(Tasks_stateMachine, (const char *) "State machine", TASK_STACK_SIZE, TASK_PRIO, mainTaskHandle);
+
+    sysTickIntHandle = xTimerCreate((const char *) "uptime",
+									( 1000 / portTICK_PERIOD_MS ),
+									pdTRUE,
+	                                0,
+									Tasks_Uptime);
+
+	if (NULL == sysTickIntHandle)
+	{
+	    FATAL_PRINT("Not enough memory to create uptime Timer!");
+	}
+	else if(pdFAIL == xTimerStart(sysTickIntHandle, 0xFFFF))
+	{
+	    FATAL_PRINT("Not enough memory to start uptime Timer!");
+	}
+
+	if (xSemaphore == NULL)
+	{
+	    FATAL_PRINT("Error occurred in creating mutex");
+	}
+
 }
 
-void TickKill(void)
+void Tasks_restart(void)
 {
-    killTick = true;
+	if (xSemaphoreTake(xSemaphore, ( TickType_t ) 10) == pdTRUE)
+	{
+	    restart = 1;
+	    xSemaphoreGive(xSemaphore);
+	}
+	else
+	{
+	    WARN_PRINT("Cannot take the semaphore!");
+	}
+
 }
 
-static void Tick(void* context)
+static void Tasks_Uptime(void *params)
 {
-    for(;;)
-    {
-        WDOG_Feed();
-        if(killTick)
-        {
-            killTick = false;
-            vTaskDelete(NULL);
-        }
-
-        context = context;
-        SensorData data;
-
-        for(uint32_t sensor = 0; sensor < NUM_SENSORS; ++sensor)
-        {
-            if(enabledSensors[sensor])
-            {
-                // Get data
-                sensors[sensor](&data);
-
-                for(uint32_t meas = 0; meas < data.numMeas; ++meas)
-                {
-                    WDOG_Feed();
-                    if(0 > MqttSendData(&data.meas[meas]))
-                    {
-                        // TODO: Check why taskDelete/taskSuspend deletes/suspens __current__ thread
-                        // vTaskDelete(commandTaskHandle);
-                        MqttStopPolling();
-                        printf("Sending data FAILED! Restarting WiFi and MQTT!\n");
-                        Restart();
-                    }
-                    else
-                    {
-                        printf("Data sent successfully!\n");
-                        LedSet(ORANGE_LED, LED_SET_TOGGLE);
-                    }
-                }
-            }
-        }
-        vTaskDelay(PUBLISH_PERIOD);
-    }
+    uptime++;
+    if ((uptime % 60) == 0)
+        DEBUG_PRINT("uptime: %lu (seconds)", uptime);
 }
 
-void Restart(void)
+static void Tasks_stateMachine(void *context)
 {
-    WDOG_Feed();
-    vTaskDelete(commandTaskHandle);
-    vTaskDelete(reconnectTaskHandle);
-    vTaskDelete(subscriptionTaskHandle);
-    vTaskDelete(wifiReconnectHandle);
-    MqttDeinit();
-    printf("WiFi deinit = %d\n\r", WiFiDeinit());
-    wifiConnected = false;
-    MqttConnectInit();
-    OS_taskCreate(WifiReconnect,
-                  (const int8_t *) "WiFi Reconnection",
-                  TASK_STACK_SIZE,
-                  TASK_PRIO - 1,
-                  wifiReconnectHandle);
+	TASK_STATES state = WIFI_INIT;
+	context = context;
+
+	uint8_t fail_count = 0;
+	while (1)
+	{
+
+		ProcessCheck_ControlFlag(xTaskGetCurrentTaskHandle());
+
+		if (xSemaphoreTake(xSemaphore, ( TickType_t ) 10) == pdTRUE)
+		{
+			if (restart)
+			{
+				state = RESTART;
+				restart = 0;
+			}
+			xSemaphoreGive(xSemaphore);
+		}
+
+		switch (state) {
+		case WIFI_INIT:
+			if (WiFiInit() >= 0)
+			{
+				state = MQTT_CONN;
+			}
+			else
+			{
+				vTaskDelay(RECONNECT_PERIOD / portTICK_RATE_MS);
+			}
+			break;
+		case MQTT_CONN:
+			if (0 == MqttInit()) {
+				state = MQTT_SUB;
+			}
+			if (fail_count++ > MQTT_CONN_MAX_FAILS) {
+				state = RESTART;
+				fail_count = 0;
+			}
+			else
+			{
+				vTaskDelay(RECONNECT_PERIOD / portTICK_RATE_MS);
+			}
+			break;
+		case MQTT_SUB:
+			CommandHandlerInit();
+			state = RUNNING_STATE;
+			break;
+		case RUNNING_STATE:
+			if (Tick())
+			{
+				state = RESTART;
+			}
+			else
+			{
+				vTaskDelay(tickPeriod / portTICK_RATE_MS);
+			}
+			break;
+		case ERROR_STATE:
+			//watchdog restart
+			//not in used
+			break;
+		case RESTART:
+			DEBUG_PRINT("Restarting by WDG");
+			XdkWdog_RestartByWdog();
+			vTaskDelay(3000 / portTICK_RATE_MS);
+			break;
+		}
+	}
+}
+
+
+static uint8_t Tick(void)
+{
+	SensorData data;
+
+	for(uint32_t sensor = 0; sensor < NUM_SENSORS; ++sensor)
+	{
+		if(enabledSensors[sensor])
+		{
+			// Get data
+			sensors[sensor](&data);
+			//XdkWdog_Feed();
+
+			for(uint32_t meas = 0; meas < data.numMeas; ++meas)
+			{
+				if(0 > MqttSendData(&data.meas[meas]))
+				{
+					DEBUG_PRINT("Sending data FAILED! Restarting WiFi and MQTT!");
+					return 1;
+				}
+				else
+				{
+					LedSet(ORANGE_LED, LED_SET_TOGGLE);
+				}
+			}
+		}
+	}
+    return 0;
 }
 
 void CommandHandlerInit(void)
 {
-    WDOG_Feed();
-    int8_t retValPerSwTimer = OS_ERR_NOT_ENOUGH_MEMORY;
-    retValPerSwTimer = OS_taskCreate(MqttYield,
-                                     (const int8_t *) "MQTT Commands",
-                                     TASK_STACK_SIZE,
-                                     TASK_PRIO,
-                                     commandTaskHandle);
-
-    if(OS_ERR_NO_ERROR != retValPerSwTimer)
-    {
-        printf("Error occurred in creating MQTT command task \n\r");
-    }
-    else
-    {
-        printf("MQTT command task Success \n\r");
-    }
-}
-
-void WifiConnectInit(void)
-{
-    WDOG_Feed();
-    printf("Connecting WiFi...\n");
-    if(-1 == WiFiInit(&WifiConnectionCallback))
-    {
-        printf("Connection to WLAN failed. Retrying in %d ms\n", (int)RECONNECT_PERIOD);
-        OS_taskCreate(WifiReconnect,
-                      (const int8_t *) "WiFi Reconnection",
-                      TASK_STACK_SIZE,
-                      TASK_PRIO - 1,
-                      wifiReconnectHandle);
-    }
-}
-
-void WifiReconnect(void* context)
-{
-    for(;;)
-    {
-        WDOG_Feed();
-        if(wifiConnected)
-        {
-            vTaskDelete(NULL);
-        }
-        context = context;
-        vTaskDelay(RECONNECT_PERIOD);
-        WDOG_Feed();
-        if(0 == WiFiInit(&WifiConnectionCallback))
-        {
-            vTaskDelete(NULL);
-        }
-    }
-}
-
-void MqttConnectInit(void)
-{
-    WDOG_Feed();
-    OS_taskCreate(MqttConnectionTask,
-                  (const int8_t *) "MQTT Connection",
-                  TASK_STACK_SIZE,
-                  TASK_PRIO - 2,
-                  reconnectTaskHandle);
-}
-
-void MqttSubscriptionInit(void)
-{
-    WDOG_Feed();
-    OS_taskCreate(MqttSubscriptionTask,
-                  (const int8_t *) "MQTT Subscription",
-                  TASK_STACK_SIZE,
-                  TASK_PRIO - 2,
-                  subscriptionTaskHandle);
-}
-
-static void WifiConnectionCallback(int status)
-{
-    WDOG_Feed();
-    if(0 == status)
-    {
-        printf("WiFi connected OK!\n");
-        WiFiPrintIP();
-        wifiConnected = true;
-    }
-    else
-    {
-        Restart();
-    }
-
-}
-
-static void MqttConnectionTask(void* context)
-{
-    for(;;)
-    {
-        WDOG_Feed();
-        context = context;
-        if(wifiConnected)
-        {
-            printf("Connecting MQTT...\n");
-            if(0 == MqttInit())
-            {
-                MqttSubscriptionInit();
-                vTaskDelete(NULL);
-            }
-            else
-            {
-                printf("Connection to MQTT server failed. Retrying in %d ms\n", (int)RECONNECT_PERIOD);
-                Restart();
-            }
-        }
-        vTaskDelay(RECONNECT_PERIOD);
-    }
-}
-
-static void MqttSubscriptionTask(void* context)
-{
-    for(;;)
-    {
-        WDOG_Feed();
-        context = context;
-        if(wifiConnected)
-        {
-            printf("Subscribing to MQTT...\n");
-            if(0 == MqttSubscribe(&CommandConfigHandler))
-            {
-                TickInit();
-                CommandHandlerInit();
-                vTaskDelete(NULL);
-            }
-            else
-            {
-                printf("Subscription to MQTT server failed. Retrying in %d ms\n", (int)RECONNECT_PERIOD);
-                Restart();
-            }
-        }
-        vTaskDelay(RECONNECT_PERIOD);
-    }
+    TASK_CREATE_WITHCHECK(MqttYield, (const char *) "MQTT Commands", 1000, TASK_PRIO - 1, mqttYieldTaskHandle);
 }

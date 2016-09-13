@@ -19,6 +19,7 @@ export BCDS_APP_SOURCE_DIR = $(BCDS_APP_DIR)/src
 override CFLAGS += $(CFLAGS_APP)
 override ASMFLAGS += $(ASMFLAGS_APP)
 override LDFLAGS += $(LDFLAGS_APP)
+override BCDS_FREERTOS_DEFAULT_CONFIG_PATH = $(BCDS_APP_DIR)/inc
 
 export BCDS_XDK_INCLUDES = \
 	-I $(BCDS_APP_DIR)/inc \
@@ -39,6 +40,8 @@ export BCDS_XDK_APP_SOURCE_FILES = \
 	$(BCDS_APP_DIR)/src/leds.c \
 	$(BCDS_APP_DIR)/src/controls.c \
 	$(BCDS_APP_DIR)/src/tasks.c \
+	$(BCDS_APP_DIR)/src/xdkwdog.c \
+	$(BCDS_APP_DIR)/src/processcheck_task.c \
 	$(BCDS_APP_DIR)/src/sensordata.c \
 	$(BCDS_APP_DIR)/src/MQTTClient.c \
 	$(BCDS_APP_DIR)/src/MQTTXDK.c \
@@ -65,17 +68,12 @@ FLASH = $(FLASHNIX)
 RMDIRS := rm -rf
 
 # relayr cloud address & credentials
-CREDENTIALS_JSON = $(BCDS_APP_DIR)/src/credentials.json
 CREDENTIALS_HEADER = $(BCDS_APP_DIR)/inc/credentials.h
-MQTT_SERVER = mqtt.relayr.io
-MQTT_PORT = 1883
-SSID = <PUT_YOUR_WIFI_SSID_HERE!
-PASS = <PUT_YOUR_WIFI_PASS_HERE!
+
 XDK_APP_ADDRESS = 0x00010000
 BCDS_DEVICE_ID = EFM32GG390F1024
 OPENOCD = openocd
 OOCDINTERFACE = $(XDK_OCD_INTERFACE)
-PYTHON_EXE = python
 
 .PHONY: all clean flashocd flashsegger debug release
 
@@ -102,21 +100,14 @@ $(BUILD_TYPE)/objects/%.o: %.c
 	@echo "Building file $<"
 	@$(CC) $(DEPEDENCY_FLAGS) $(BCDS_CFLAGS_DEBUG_COMMON) $(BCDS_XDK_INCLUDES) -c $< -o $@
 
-build: createcredentials
+build: 
 		$(MAKE) -C $(BCDS_BASE_DIR)/xdk110/Common -f application.mk $(BUILD_TYPE)
 		@echo [ HEX ] $(BUILD_TYPE)/$(BCDS_APP_NAME).hex
 		@$(OBJCOPY) -O ihex $(BUILD_TYPE)/$(BCDS_APP_NAME).out $(BUILD_TYPE)/$(BCDS_APP_NAME).hex
 		@echo [ SIZE ]
 		@$(ELF_SIZE) -B -x $(BUILD_TYPE)/$(BCDS_APP_NAME).hex
 
-createcredentials:
-	@echo "Generating credentials."
-	@$(PYTHON_EXE) $(BCDS_APP_DIR)/gencredentials.py $(CREDENTIALS_JSON) $(CREDENTIALS_HEADER) $(MQTT_SERVER) $(MQTT_PORT) \
-	$(SSID) $(PASS)
-
 clean:
-	 $(RMDIRS) $(CREDENTIALS_HEADER)
-	 $(RMDIRS) $(FLASH_CMD_FILE)
 	 $(MAKE) -C $(BCDS_BASE_DIR)/xdk110/Common -f application.mk clean
 
 flashseggerexe: build

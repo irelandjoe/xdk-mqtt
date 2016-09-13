@@ -2,6 +2,8 @@
 #include "XdkSensorHandle.h"
 #include "lightdata.h"
 
+#include "logging.h"
+
 static const char LIGHT_SENSOR_LABEL[] = "MAX09 Light Sensor";
 
 
@@ -45,21 +47,21 @@ void LightGetData(SensorData* data)
     returnValue = LightSensor_readRawData(xdkLightSensor_MAX44009_Handle, &luxRawData);
     if(SENSOR_SUCCESS == returnValue)
     {
-        printf("\n%s Raw Data : %x \n", LIGHT_SENSOR_LABEL, luxRawData);
+        TRACE_PRINT("%s Raw Data : %x", LIGHT_SENSOR_LABEL, luxRawData);
     }
     else
     {
-        printf("%s Raw Data read FAILED\n\r", LIGHT_SENSOR_LABEL);
+        WARN_PRINT("%s Raw Data read FAILED", LIGHT_SENSOR_LABEL);
     }
 
     returnValue = LightSensor_readLuxData(xdkLightSensor_MAX44009_Handle, &milliLuxData);
     if(SENSOR_SUCCESS == returnValue)
     {
         FillLightData(data, milliLuxData);
-        printf("%s Data : %d mlux\n\r", LIGHT_SENSOR_LABEL, (unsigned int)milliLuxData);
+        TRACE_PRINT("%s Data : %d mlux", LIGHT_SENSOR_LABEL, (unsigned int)milliLuxData);
     }
     else
     {
-        printf("%s Data read FAILED\n\r", LIGHT_SENSOR_LABEL);
+    	WARN_PRINT("%s Data read FAILED", LIGHT_SENSOR_LABEL);
     }
 }

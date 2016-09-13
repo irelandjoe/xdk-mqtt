@@ -2,6 +2,8 @@
 #include "XdkSensorHandle.h"
 #include "magnetodata.h"
 
+#include "logging.h"
+
 static const char MAGNETO_LABEL[] = "BMM150 Magnetometer";
 
 static void FillMagnetoData(SensorData* data, Magnetometer_XyzData_T* meas)
@@ -45,7 +47,7 @@ void MagnetoGetData(SensorData* data)
     returnValue = Magnetometer_readXyzLsbData(xdkMagnetometer_BMM150_Handle, &getMagData);
     if(SENSOR_SUCCESS == returnValue)
     {
-        printf("\n%s Raw Data : x = %ld, y = %ld, z = %ld\n",
+    	TRACE_PRINT("%s Raw Data : x = %ld, y = %ld, z = %ld",
                MAGNETO_LABEL,
                (long int)getMagData.xAxisData,
                (long int)getMagData.yAxisData,
@@ -53,14 +55,14 @@ void MagnetoGetData(SensorData* data)
     }
     else
     {
-        printf("%s Raw Data read FAILED\n\r", MAGNETO_LABEL);
+        WARN_PRINT("%s Raw Data read FAILED", MAGNETO_LABEL);
     }
 
     returnValue = Magnetometer_readXyzTeslaData(xdkMagnetometer_BMM150_Handle, &getMagData);
     if(SENSOR_SUCCESS == returnValue)
     {
         FillMagnetoData(data, &getMagData);
-        printf("\n%s Converted Data : x = %ld uT, y = %ld uT, z = %ld uT\n\r",
+        TRACE_PRINT("%s Converted Data : x = %ld uT, y = %ld uT, z = %ld uT",
                MAGNETO_LABEL,
                (long int)getMagData.xAxisData,
                (long int)getMagData.yAxisData,
@@ -68,6 +70,6 @@ void MagnetoGetData(SensorData* data)
     }
     else
     {
-        printf("%s Converted Data read FAILED\n\r", MAGNETO_LABEL);
+    	WARN_PRINT("%s Converted Data read FAILED", MAGNETO_LABEL);
     }
 }
