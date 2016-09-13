@@ -28,7 +28,6 @@
 *.app
 
 # Generated files + folders
-inc/credentials.h
 jlinkcmd.jlink
 debug
 release
