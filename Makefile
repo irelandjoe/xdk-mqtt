@@ -25,7 +25,7 @@ export BCDS_XDK_INCLUDES = \
 	-I $(BCDS_APP_DIR)/inc \
 	-I $(BCDS_APP_DIR)/config \
 	-I $(BCDS_APP_DIR)/src/jsmn \
-	-I $(BCDS_APP_DIR)/src/paho/MQTTPacket/src
+	-I $(BCDS_APP_DIR)/src/mqtt
 
 # Application Files :Add the Source file
 export BCDS_XDK_APP_SOURCE_FILES = \
@@ -47,11 +47,11 @@ export BCDS_XDK_APP_SOURCE_FILES = \
 	$(BCDS_APP_DIR)/src/MQTTClient.c \
 	$(BCDS_APP_DIR)/src/MQTTXDK.c \
 	$(BCDS_APP_DIR)/src/jsmn/jsmn.c \
-	$(BCDS_APP_DIR)/src/paho/MQTTPacket/src/MQTTPacket.c \
-	$(BCDS_APP_DIR)/src/paho/MQTTPacket/src/MQTTConnectClient.c \
-	$(BCDS_APP_DIR)/src/paho/MQTTPacket/src/MQTTDeserializePublish.c \
-	$(BCDS_APP_DIR)/src/paho/MQTTPacket/src/MQTTSubscribeClient.c \
-	$(BCDS_APP_DIR)/src/paho/MQTTPacket/src/MQTTSerializePublish.c
+	$(BCDS_APP_DIR)/src/mqtt/MQTTPacket.c \
+	$(BCDS_APP_DIR)/src/mqtt/MQTTConnectClient.c \
+	$(BCDS_APP_DIR)/src/mqtt/MQTTDeserializePublish.c \
+	$(BCDS_APP_DIR)/src/mqtt/MQTTSubscribeClient.c \
+	$(BCDS_APP_DIR)/src/mqtt/MQTTSerializePublish.c
 
 ELF_SIZE = $(QUOTE)arm-none-eabi-size$(QUOTE)
 OBJCOPY = $(QUOTE)arm-none-eabi-objcopy$(QUOTE)
