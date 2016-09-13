@@ -37,7 +37,9 @@ In this example we'll be using Windows 10 Home Edition:
  ![Disk mount](assets/ScreenShot_2016-05-13_at_11.01.20.png)
  - Select the iso image of Windows 10 that you downloaded before, in the first steps of the tutorial.
  - Now click on "Start" tho run the virtual machine; shortly you will see the Windows 10 boot screen.
+
   ![Start virtual machine](assets/ScreenShot_2016-05-13_at_11.11.28.png)
+
  - Now install Windows normally, using the default options; when prompted to introduce a "product key," select "I don't have a product key" (this is not a big deal, you can continue using the trial period).
  - Once you're set, you can start and shut down the virtual machine, as if it were another computer
  
@@ -57,7 +59,9 @@ This tutorial is intended to be simple and accessible to everyone, and thus, it 
 ## 5. IMPORTING THE PROJECT IN THE XDK WORKBENCH
 Now let's import the project in the XDK Workbench, so you can flash your own XDKs from now on:
  - Open the XDK Workbench...
+ - 
    ![XDK workbench](assets/xdk_icon.png)
+
  - The first time you open it, it will ask you to set a password, ignore this (click "no"), and continue.
  - Now, close the tab that shows up with the welcome suggestions.
   
@@ -69,7 +73,9 @@ Now let's import the project in the XDK Workbench, so you can flash your own XDK
    ![Import project](assets/ScreenShot_2016-05-13_at_12.23.34.png)
  
  - Now introduce these details in the following window, as shown below (you can select your xdk-mqtt repository folder manually too):
+ - 
  ![Import project2](assets/ScreenShot_2016-05-13_at_12.26.59.png)
+
  - Click on "finish," and you'll see the brand new project added on the left window.
  
  
