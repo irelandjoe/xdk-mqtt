@@ -23,6 +23,7 @@ override BCDS_FREERTOS_DEFAULT_CONFIG_PATH = $(BCDS_APP_DIR)/inc
 
 export BCDS_XDK_INCLUDES = \
 	-I $(BCDS_APP_DIR)/inc \
+	-I $(BCDS_APP_DIR)/config \
 	-I $(BCDS_APP_DIR)/src/jsmn \
 	-I $(BCDS_APP_DIR)/src/paho/MQTTPacket/src
 
@@ -68,7 +69,7 @@ FLASH = $(FLASHNIX)
 RMDIRS := rm -rf
 
 # relayr cloud address & credentials
-CREDENTIALS_HEADER = $(BCDS_APP_DIR)/inc/credentials.h
+CREDENTIALS_HEADER = $(BCDS_APP_DIR)/config/credentials.h
 
 XDK_APP_ADDRESS = 0x00010000
 BCDS_DEVICE_ID = EFM32GG390F1024

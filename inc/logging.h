@@ -8,8 +8,7 @@
 #ifndef INC_LOGGING_H_
 #define INC_LOGGING_H_
 
-#define DEBUG
-
+#include "config.h"
 
 #ifdef TRACE
 #define TRACE_PRINT(fmt, ...) \

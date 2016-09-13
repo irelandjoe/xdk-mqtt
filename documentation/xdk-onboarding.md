@@ -86,7 +86,7 @@ Let's hardcode the WiFi and the MQTT credentials of your device. But first we'll
  
 ### WiFi credentials
  - Now let's introduce the credentials of the WiFi network:
- - On the folder of the project (left vertical window), go to the folder "inc" and double click on the file named "credentials.h"
+ - On the folder of the project (left vertical window), go to the folder "config" and double click on the file named "credentials.h"
  - Find the fields WLAN\_CONNECT\_WPA\_SSID and WLAN\_CONNECT\_WPA\_PASS. You may introduce the WiFi network and the password, as shown in the screenshot below:
     ![Credentials_wifi](assets/ScreenShot_2016-09-13_at_10.03.19.png)
  
@@ -108,7 +108,7 @@ Let's hardcode the WiFi and the MQTT credentials of your device. But first we'll
 }
 ```
   
- - Now, on the XDK Workbench, on the directory tree (left side of the window), go to the folder "inc" and double click on the file "credentials.h".
+ - Now, on the XDK Workbench, on the directory tree (left side of the window), go to the folder "config" and double click on the file "credentials.h".
  - Modify the existing data, overwriting any existing data - convert table see below.
    ![Credentials](assets/ScreenShot_2016-09-13_at_10.03.19.png)
    

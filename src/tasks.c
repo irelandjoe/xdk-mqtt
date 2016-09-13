@@ -169,7 +169,6 @@ static uint8_t Tick(void)
 		{
 			// Get data
 			sensors[sensor](&data);
-			//XdkWdog_Feed();
 
 			for(uint32_t meas = 0; meas < data.numMeas; ++meas)
 			{

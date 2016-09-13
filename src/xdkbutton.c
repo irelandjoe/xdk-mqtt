@@ -49,7 +49,7 @@ int SetButtonCallback(BUTTON_handle_tp* buttonHandle, buttonHandler handler)
 {
     int ret = 0;
     BUTTON_errorTypes_t buttonReturn = BUTTON_ERROR_INVALID_PARAMETER;
-    buttonReturn = BUTTON_setCallback(*buttonHandle, handler, BUTTONONE);xs
+    buttonReturn = BUTTON_setCallback(*buttonHandle, handler, BUTTONONE);
     if(BUTTON_ERROR_OK != buttonReturn)
     {
     	WARN_PRINT("Setting callback for button failed with status = %d!", (int)buttonReturn);
