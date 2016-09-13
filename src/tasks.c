@@ -124,7 +124,7 @@ void CommandHandlerInit(void)
     retValPerSwTimer = xTaskCreate(MqttYield,
                                      (const int8_t *) "MQTT Commands",
                                      TASK_STACK_SIZE,
-									 NULL,
+                                     NULL,
                                      TASK_PRIO,
                                      commandTaskHandle);
 
@@ -161,14 +161,14 @@ void WifiReconnect(void* context)
         WDOG_Feed();
         if(wifiConnected)
         {
-        	vTaskDelete(NULL);
+            vTaskDelete(NULL);
         }
         context = context;
         vTaskDelay(RECONNECT_PERIOD);
         WDOG_Feed();
         if(0 == WiFiInit(&WifiConnectionCallback))
         {
-        	vTaskDelete(NULL);
+            vTaskDelete(NULL);
         }
     }
 }

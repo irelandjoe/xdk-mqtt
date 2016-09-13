@@ -133,8 +133,7 @@ void PeriodControl(const char* json, jsmntok_t* command, jsmntok_t* val)
     {
         if(IsName("pub", json + command->start, 3))
         {
-        	xTimerChangePeriod(tickTaskHandle, value, 100);
-
+            xTimerChangePeriod(tickTaskHandle, value, 100);
         }
         else if(IsName("sub", json + command->start, 3))
         {
