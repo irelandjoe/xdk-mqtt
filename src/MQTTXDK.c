@@ -139,7 +139,7 @@ int ConnectNetwork(Network* net, int8_t* addr, int port)
 
     sysTickIntHandle = xTimerCreate((const char *) "MqttTimer",
                                       TIMER_TICK_PERIOD,
-									  pdTRUE,
+                                      pdTRUE,
                                       0,
                                       sysTickIntHandler);
 

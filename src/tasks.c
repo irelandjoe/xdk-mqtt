@@ -112,7 +112,7 @@ void Restart(void)
     xTaskCreate(WifiReconnect,
                   (const int8_t *) "WiFi Reconnection",
                   TASK_STACK_SIZE,
-				  NULL,
+                  NULL,
                   TASK_PRIO - 1,
                   &wifiReconnectHandle);
 }
@@ -148,7 +148,7 @@ void WifiConnectInit(void)
         xTaskCreate(WifiReconnect,
                       (const int8_t *) "WiFi Reconnection",
                       TASK_STACK_SIZE,
-					  NULL,
+                      NULL,
                       TASK_PRIO - 1,
                       wifiReconnectHandle);
     }
