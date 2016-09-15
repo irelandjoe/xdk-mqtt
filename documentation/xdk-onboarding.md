@@ -3,6 +3,7 @@
 ## 1. Introduction
 
 This document contains instructions on how to onboard XDK and compile XDK firmware.
+Onboarding is proccess when the XDK is able to send data to cloud. 
 It begins with a list of prerequisities and guidelines on how to get the code, compile and onboard XDK.
 
 ## 2. Prerequisities
@@ -13,6 +14,7 @@ It begins with a list of prerequisities and guidelines on how to get the code, c
 -  Windows (in this tutorial, Window 10 Home Edition is used)
 -  [XDK Workbench release 1.6.0](http://xdk.bosch-connectivity.com/software-downloads)
 -  [relayr XDK firmware](https://github.com/relayr/xdk-mqtt)
+-  XDK serial number (Bosch account)
 
 ## 3. Installing Windows on a virtual machine
 
@@ -35,18 +37,22 @@ If you don't have a Windows computer, you will first need to set up a virtual ma
 11.  Select the iso image of Windows 10 that you downloaded before, in the first steps of the tutorial.
 12.  Now click on "Start" to run the virtual machine; shortly you will see the Windows 10 boot screen.  
   ![Start virtual machine](assets/ScreenShot_2016-05-13_at_11.11.28.png)
-13.  Now install Windows normally, using the default options; when prompted to introduce a "product key," select "I don't have a product key" (this is not a big deal, you can continue using the trial period).
+13.  Now install Windows normally, using the default options; when prompted to introduce a "product key," select "I don't have a product key" (You can continue using windows without activation, there is no limitation).
 14.  Once you're set, you can start and shut down the virtual machine, as if it were another computer.
  
 ## 4. Setting up the XDK Workbench
 
 All these instructions are to be performed on a Windows computer (or on your brand new Virtual Machine).
 
-1.  Download the [XDK Workbench (release 1.6.0)](http://xdk.bosch-connectivity.com/software-downloads).
-2.  Install it with the default options (i.e. don't modify the default folder or anything!).
-3.  Download the latest version of the repository with the relayr [XDK project](https://codeload.github.com/relayr/xdk-mqtt/zip/master), or [here](https://github.com/relayr/xdk-mqtt/tree/dev-ev), and uncompress it in "C:/" (in the root folder of the hard drive!).
-4.  Install it with the default options, and in the folder that the installer wants.
-5.  If you did everything right, at the end of this process, now you should have three new folders in your hard drive, as shown below:
+1.  Go to [XDK Workbench download page](http://xdk.bosch-connectivity.com/software-downloads).
+2.  If you don't have an account, please create one - serial number of XDK is required.
+3.  Download the [XDK Workbench (release 1.6.0)](http://xdk.bosch-connectivity.com/software-downloads).
+4.  Install it with the default options (i.e. don't modify the default folder or anything!).
+5.  Download the latest version of the repository with the relayr [XDK project](https://codeload.github.com/relayr/xdk-mqtt/zip/master), or [here](https://github.com/relayr/xdk-mqtt/tree/dev-ev), and uncompress it in "C:/" (in the root folder of the hard drive!).
+6.  Install it with the default options, and in the folder that the installer wants.
+7.  If you did everything right, at the end of this process, now you should have two new folders in your hard drive, as shown below:
+    
+![folders](assets/ScreenShot_2016-09-15_at_14.52.28.png)
  
  
 ## 5. Importing the project into XDK Workbench
@@ -69,7 +75,9 @@ Now let's import the project in the XDK Workbench, so you can flash your own XDK
 
 Let's hardcode the WiFi and the MQTT credentials of your device. First,
 you'll need to connect the device. If you're using a virtual machine, you
-will need to make it available to it.
+will need to make XDK available in VirtualBox.
+
+### Make XDK available in VirtualBox
 
 *IMPORTANT: If you're not using a virtual machine, you can skip this first
 set of steps and skip to the WiFi and MQTT credential sections below. Just
@@ -148,7 +156,13 @@ list and add it again after disconnecting and reconnecting it!
 Once the device is flashed, simply disconnect and reset it (with the switch on
 the side). After rebooting, it should start publishing data to the cloud.
  
+ 
+## 8. Check XDK onboarding
 
+Connect to [relayr Developer Dashboard](http://developer.relayr.io) and go to "Devices" → "your device name".
+There you should see data from the XDK. See picture below:
+ 
+![Relayr cloud](assets/ScreenShot_2016-09-15_at_14.35.14.png)
  
  
  
