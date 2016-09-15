@@ -4,6 +4,6 @@
 #include <stdint.h>
 #include "sensordata.h"
 
-void GyroInit(void);
+uint8_t GyroInit(void);
 void GyroDeinit(void);
 void GyroGetData(SensorData* data);

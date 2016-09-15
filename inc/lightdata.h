@@ -4,6 +4,6 @@
 #include <stdint.h>
 #include "sensordata.h"
 
-void LightInit(void);
+uint8_t LightInit(void);
 void LightDeinit(void);
 void LightGetData(SensorData* data);

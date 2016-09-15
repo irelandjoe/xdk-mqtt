@@ -37,7 +37,7 @@ static const uint32_t TASK_PRIO = 4;
 
 int tickPeriod = PUBLISH_PERIOD;
 
-void Tasks_init(void)
+uint8_t Tasks_init(void)
 {
     xSemaphore = xSemaphoreCreateMutex();
 

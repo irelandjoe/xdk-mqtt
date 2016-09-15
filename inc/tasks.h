@@ -7,7 +7,7 @@
 
 extern int tickPeriod;
 
-void Tasks_init(void);
+uint8_t Tasks_init(void);
 void Tasks_restart(void);
 
 typedef enum task_states {

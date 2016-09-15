@@ -10,7 +10,7 @@ static const char LIGHT_SENSOR_LABEL[] = "MAX09 Light Sensor";
 static void FillLightData(SensorData* data, uint32_t meas)
 {
     data->numMeas = 1;
-    snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "light");
+    snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "luminosity");
 
     snprintf(data->meas[0].value,
              SENSOR_VALUE_SIZE,
@@ -23,9 +23,9 @@ Retcode_T LightPrivateInit(void* handle)
     return LightSensor_init((LightSensor_HandlePtr_T)handle);
 }
 
-void LightInit(void)
+uint8_t LightInit(void)
 {
-    SensorInit(&LightPrivateInit,
+    return SensorInit(&LightPrivateInit,
                xdkLightSensor_MAX44009_Handle,
                LIGHT_SENSOR_LABEL);
 }

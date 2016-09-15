@@ -25,8 +25,6 @@
 #include "xdkwdog.h"
 #include "logging.h"
 
-#include "URU_usbResetUtility_ih.h"
-
 
 SensorGetter sensors[] = {&EnvSensorGetData,
                           &AccelGetData,

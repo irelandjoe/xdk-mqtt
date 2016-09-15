@@ -51,7 +51,7 @@ static void ProcessCheck_Task(void *context)
     }
 }
 
-void ProcessCheck_Init(void)
+uint8_t ProcessCheck_Init(void)
 {
     uint8_t i = 0;
     for (i = 0; i < PROCESSCHECK_MAXPROCS; i++)
@@ -64,6 +64,11 @@ void ProcessCheck_Init(void)
 
     xTaskCreate(ProcessCheck_Task, (const char * ) "ProcessCheck", 1000, NULL,
             tskIDLE_PRIORITY, &mainTaskHandle);
+
+    if (mainTaskHandle == NULL)
+    	return 0;
+
+    return 1;
 }
 
 void ProcessCheck_RegisterProc(xTaskHandle pvProc, const char * const name)

@@ -2,16 +2,17 @@
 #include "sensordata.h"
 #include "logging.h"
 
-void SensorInit(SensorInitializer init, void* handle, const char* label)
+uint8_t SensorInit(SensorInitializer init, void* handle, const char* label)
 {
     if(SENSOR_SUCCESS == init(handle))
     {
         DEBUG_PRINT("%s initialization Success", label);
+        return 1;
     }
-    else
-    {
-        ERR_PRINT("%s initialization FAILED", label);
-    }
+
+    ERR_PRINT("%s initialization FAILED", label);
+
+    return 0;
 }
 
 void SensorDataClear(SensorData* data)

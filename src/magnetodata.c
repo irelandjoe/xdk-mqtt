@@ -9,7 +9,7 @@ static const char MAGNETO_LABEL[] = "BMM150 Magnetometer";
 static void FillMagnetoData(SensorData* data, Magnetometer_XyzData_T* meas)
 {
     data->numMeas = 1;
-    snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "magnetometer");
+    snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "magneticField");
 
     snprintf(data->meas[0].value,
              SENSOR_VALUE_SIZE,
@@ -24,9 +24,9 @@ Retcode_T PrivateInit(void* handle)
     return Magnetometer_init((Magnetometer_HandlePtr_T)handle);
 }
 
-void MagnetoInit(void)
+uint8_t MagnetoInit(void)
 {
-    SensorInit(&PrivateInit,
+    return SensorInit(&PrivateInit,
                xdkMagnetometer_BMM150_Handle,
                MAGNETO_LABEL);
 }

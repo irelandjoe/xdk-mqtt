@@ -9,7 +9,7 @@ static const char GYRO_LABEL[] = "BMG160 Gyroscope";
 static void FillGyroData(SensorData* data, Gyroscope_XyzData_T* meas)
 {
     data->numMeas = 1;
-    snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "gyro");
+    snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "angularSpeed");
 
     snprintf(data->meas[0].value,
              SENSOR_VALUE_SIZE,
@@ -24,9 +24,9 @@ static Retcode_T GyroPrivateInit(void* handle)
     return Gyroscope_init((Gyroscope_HandlePtr_T)handle);
 }
 
-void GyroInit(void)
+uint8_t GyroInit(void)
 {
-    SensorInit(&GyroPrivateInit,
+    return SensorInit(&GyroPrivateInit,
                xdkGyroscope_BMG160_Handle,
                GYRO_LABEL);
 }

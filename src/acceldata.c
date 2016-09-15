@@ -23,9 +23,9 @@ static Retcode_T AccelPrivateInit(void* handle)
     return Accelerometer_init((Accelerometer_HandlePtr_T)handle);
 }
 
-void AccelInit(void)
+uint8_t AccelInit(void)
 {
-    SensorInit(&AccelPrivateInit,
+    return SensorInit(&AccelPrivateInit,
                xdkAccelerometers_BMA280_Handle,
                ACCEL_LABEL);
 }

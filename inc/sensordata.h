@@ -26,5 +26,5 @@ typedef Retcode_T(*SensorInitializer)(void* handle);
 extern SensorGetter sensors[];
 extern bool enabledSensors[];
 
-void SensorInit(SensorInitializer init, void* handle, const char* label);
+uint8_t SensorInit(SensorInitializer init, void* handle, const char* label);
 void SensorDataClear(SensorData* data);

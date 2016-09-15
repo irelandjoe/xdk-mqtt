@@ -133,8 +133,7 @@ MqttErrorCode MqttConnect(void)
 static size_t SerializeData(NameValue* data, char* msg)
 {
     return sprintf(msg,
-                   "{\"meaning\":\"%s\",\"path\":\"%s\",\"value\":%s}",
-                   data->name,
+                   "{\"meaning\":\"%s\",\"path\":\"\",\"value\":%s}",
                    data->name,
                    data->value);
 }

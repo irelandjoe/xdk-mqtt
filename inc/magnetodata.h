@@ -4,6 +4,6 @@
 #include <stdint.h>
 #include "sensordata.h"
 
-void MagnetoInit(void);
+uint8_t MagnetoInit(void);
 void MagnetoDeinit(void);
 void MagnetoGetData(SensorData* data);
