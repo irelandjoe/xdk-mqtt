@@ -11,55 +11,62 @@
 
 #include "logging.h"
 
-typedef void(*CommandHandle)(const char* json, jsmntok_t* command, jsmntok_t* val);
-
-void LedControl(const char* json, jsmntok_t* command, jsmntok_t* val);
-void PeriodControl(const char* json, jsmntok_t* command, jsmntok_t* val);
-void SensorControl(const char* json, jsmntok_t* command, jsmntok_t* val);
-
 #define MAX_TOKENS 20
+
+
+typedef void(*CommandHandle)(const char* json, jsmntok_t* path, jsmntok_t* val);
+
+typedef struct {
+	CommandHandle cmdFn;
+	char *name;
+} SubscribeCmd;
+
+static void LedControl(const char* json, jsmntok_t* path, jsmntok_t* val);
+static void PeriodControl(const char* json, jsmntok_t* command, jsmntok_t* val);
+
+static SubscribeCmd subcmds[] = {
+		{
+				.cmdFn = &LedControl,
+				.name = "LED"
+		},
+		{
+				.cmdFn = &PeriodControl,
+				.name = "period"
+		}
+};
+
 static jsmn_parser parser;
 static jsmntok_t tokens[MAX_TOKENS];
-static CommandHandle handlers[] = {&LedControl, &PeriodControl, &SensorControl};
-extern int tickPeriod;
 
-bool IsName(const char* expectedName, const char* name, int len)
+static bool IsName(const char* expectedName, const char* name, int len)
 {
     return (0 == strncmp(expectedName, name, len));
 }
 
-extern void CommandConfigHandler(MessageData* data)
+void CommandConfigHandler(MessageData* data)
 {
-    const char* commandJson = (char*)data->message->payload;
+    char* commandJson = (char*)data->message->payload;
     const int payloadLen = data->message->payloadlen;
+    commandJson[data->message->payloadlen] = 0;
     jsmn_init(&parser);
     int numTokens = jsmn_parse(&parser, commandJson, payloadLen, tokens, MAX_TOKENS);
 
-    int handleSelector = -1;
-    int commandToken = -1;
+    int nameToken = -1;
+    int pathToken = -1;
     int valueToken = -1;
     // token 0 is the command JSON object
     // token names are odd, values are even
+
+    TRACE_PRINT("received json: %s", commandJson);
     for(int tokIdx = 1; tokIdx < numTokens; tokIdx += 2)
     {
-        if(IsName("path", commandJson + tokens[tokIdx].start, 4))
+        if(IsName("name", commandJson + tokens[tokIdx].start, 4))
         {
-            if(IsName("led", commandJson + tokens[tokIdx+1].start, 3))
-            {
-                handleSelector = 0;
-            }
-            else if(IsName("per", commandJson + tokens[tokIdx+1].start, 3))
-            {
-                handleSelector = 1;
-            }
-            else if(IsName("sensor", commandJson + tokens[tokIdx+1].start, 6))
-            {
-                handleSelector = 2;
-            }
+        	nameToken = tokIdx;
         }
-        else if(IsName("command", commandJson + tokens[tokIdx].start, 7))
+        else if(IsName("path", commandJson + tokens[tokIdx].start, 4))
         {
-            commandToken = tokIdx;
+        	pathToken = tokIdx;
         }
         else if(IsName("value", commandJson + tokens[tokIdx].start, 5))
         {
@@ -67,22 +74,20 @@ extern void CommandConfigHandler(MessageData* data)
         }
     }
 
-    if((-1 != handleSelector) && (-1 != commandToken) && (-1 != valueToken))
+    if ((nameToken != -1) && (pathToken != -1) && (valueToken != -1))
     {
-        handlers[handleSelector](commandJson, &tokens[commandToken + 1], &tokens[valueToken + 1]);
+		for (unsigned int i = 0; i < sizeof(subcmds)/sizeof(SubscribeCmd); i++)
+		{
+			if (IsName(subcmds[i].name, commandJson + tokens[nameToken+1].start, strlen(subcmds[i].name) ))
+			{
+				subcmds[i].cmdFn(commandJson, tokens + pathToken +1 , tokens + valueToken +1);
+			}
+		}
     }
-    else
-    {
-    	WARN_PRINT("Unknown command received: %s %d/%d/%d/%d",
-               commandJson,
-               numTokens,
-               handleSelector,
-               commandToken,
-               valueToken);
-    }
+
 }
 
-void LedControl(const char* json, jsmntok_t* command, jsmntok_t* val)
+static void LedControl(const char* json, jsmntok_t* path, jsmntok_t* val)
 {
     LED_operations_t op = LED_SET_OFF;
 
@@ -105,21 +110,21 @@ void LedControl(const char* json, jsmntok_t* command, jsmntok_t* val)
 
     int ledidx = NUM_LEDS;
 
-    if(IsName("red", json + command->start, 3))
+    if(IsName("red", json + path->start, 3))
     {
         ledidx = RED_LED;
     }
-    else if(IsName("yellow", json + command->start, 6))
+    else if(IsName("yellow", json + path->start, 6))
     {
         ledidx = YELLOW_LED;
     }
-    else if(IsName("orange", json + command->start, 6))
+    else if(IsName("orange", json + path->start, 6))
     {
         ledidx = ORANGE_LED;
     }
     else
     {
-        WARN_PRINT("Unknown led color = %s", json + command->start);
+        WARN_PRINT("Unknown led color = %s", json + path->start);
         return;
     }
 
@@ -133,11 +138,12 @@ void PeriodControl(const char* json, jsmntok_t* command, jsmntok_t* val)
 
     if(0 < value)
     {
-        if(IsName("pub", json + command->start, 3))
+        if(IsName("publish", json + command->start, 7))
         {
-        	tickPeriod = value;
+        	DEBUG_PRINT("publish period %d", value);
+        	Tasks_PublishPeriod(value * 1000);
         }
-        else if(IsName("sub", json + command->start, 3))
+        else if(IsName("subscribe", json + command->start, 9))
         {
             MqttSetPollingPeriod((uint32_t)value);
         }
@@ -152,40 +158,3 @@ void PeriodControl(const char* json, jsmntok_t* command, jsmntok_t* val)
     }
 }
 
-void SensorControl(const char* json, jsmntok_t* command, jsmntok_t* val)
-{
-    int value = -1;
-    sscanf(json + val->start, "%d", &value);
-
-    if(0 == value || 1 == value)
-    {
-        if(IsName("env", json + command->start, 3))
-        {
-            enabledSensors[0] = (bool)value;
-        }
-        else if(IsName("acc", json + command->start, 3))
-        {
-            enabledSensors[1] = (bool)value;
-        }
-        else if(IsName("lgt", json + command->start, 3))
-        {
-            enabledSensors[2] = (bool)value;
-        }
-        else if(IsName("gyr", json + command->start, 3))
-        {
-            enabledSensors[3] = (bool)value;
-        }
-        else if(IsName("mag", json + command->start, 3))
-        {
-            enabledSensors[4] = (bool)value;
-        }
-        else
-        {
-        	WARN_PRINT("Unknown sensor: %s", json + command->start);
-        }
-    }
-    else
-    {
-    	WARN_PRINT("Wrong sensor setting = %d", value);
-    }
-}
