@@ -86,7 +86,7 @@ will need to make XDK available in VirtualBox.
 **IMPORTANT: If you're not using a virtual machine, you can skip this first
 set of steps and skip to the WiFi and MQTT credential sections below. Just
 connect your XDK to the USB and turn it on by flipping the small switch on the
-side of the device).**
+side of the device.**
 
 1.  On the top navigation bar of VirtualBox, click on "Devices" → "USB" → "USB settings..."
 2.  Now connect the XDK to a USB port, and turn it on (switch on the side of the device).
