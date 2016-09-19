@@ -2,28 +2,31 @@
 
 ## 1. Introduction
 
-This document contains instructions on how to onboard XDK and compile XDK firmware.
-Onboarding is proccess when the XDK is able to send data to cloud. 
-It begins with a list of prerequisities and guidelines on how to get the code, compile and onboard XDK.
+This document contains instructions on how to onboard XDK and compile XDK
+firmware. Onboarding is proccess when the XDK is able to send data to cloud.
+It begins with a list of prerequisities and guidelines on how to get the code,
+compile and onboard the XDK, and start sending data to the cloud.
 
 ## 2. Prerequisities
 
 ### 2.1. List of components
 
--  Virtual box (if you have a Windows PC, you don't need it)
+-  Virtual box (not necessary if you have a Windows PC)
 -  Windows (in this tutorial, Window 10 Home Edition is used)
 -  [XDK Workbench release 1.6.0](http://xdk.bosch-connectivity.com/software-downloads)
 -  [relayr XDK firmware](https://github.com/relayr/xdk-mqtt)
--  XDK serial number (Bosch account)
+-  XDK serial number (for use with your Bosch account)
 
 ## 3. Installing Windows on a virtual machine
 
-If you don't have a Windows computer, you will first need to set up a virtual machine and install Windows. In this example, we'll be using Windows 10 Home Edition.
+If you don't have a Windows computer, you must set up a virtual machine and
+install Windows on it. In this example, we'll be using Windows 10 Home
+Edition.
 
-1.  Download [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+1.  Download and install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
  (If you have a Mac, choose: "VirtualBox 5.0.20 for OS X hosts" →  amd64)
-2.  After installing it, download the ISO image of [Windows 10](https://www.microsoft.com/en-us/software-download/windows10ISO). Choose the 64-bit version, and select your preferred language.
-3.  Once finished, open VirtualBox and click on "New":  
+2.  Download the ISO image of [Windows 10](https://www.microsoft.com/en-us/software-download/windows10ISO). Choose the 64-bit version, and select your preferred language.
+3.  When the download is finished, open VirtualBox and click on "New":  
   ![New virtual machine](assets/ScreenShot_2016-05-12_at_18.31.34.png)
 4.  Name your new Virtual Machine as "Windows 10", and VirtualBox will automatically select the settings for Windows 10. Then, click on continue.  
   ![Virtual machine name](assets/ScreenShot_2016-05-12_at_19.06.28.png) 
@@ -37,37 +40,38 @@ If you don't have a Windows computer, you will first need to set up a virtual ma
 11.  Select the iso image of Windows 10 that you downloaded before, in the first steps of the tutorial.
 12.  Now click on "Start" to run the virtual machine; shortly you will see the Windows 10 boot screen.  
   ![Start virtual machine](assets/ScreenShot_2016-05-13_at_11.11.28.png)
-13.  Now install Windows normally, using the default options; when prompted to introduce a "product key," select "I don't have a product key" (You can continue using windows without activation, there is no limitation).
-14.  Once you're set, you can start and shut down the virtual machine, as if it were another computer.
+13.  Now install Windows normally, using the default options; when prompted for a "product key," select "I don't have a product key" (you can continue using Windows indefinitely without activation).
+14.  Once you're set, you can start and shut down the virtual machine.
  
 ## 4. Setting up the XDK Workbench
 
-All these instructions are to be performed on a Windows computer (or on your brand new Virtual Machine).
+These instructions are to be performed on a Windows computer or on your brand
+new Virtual Machine created in Section 3.
 
 1.  Go to [XDK Workbench download page](http://xdk.bosch-connectivity.com/software-downloads).
-2.  If you don't have an account, please create one - serial number of XDK is required.
-3.  Download the [XDK Workbench (release 1.6.0)](http://xdk.bosch-connectivity.com/software-downloads).
-4.  Install it with the default options (i.e. don't modify the default folder or anything!).
-5.  Download the latest version of the repository with the relayr [XDK project](https://codeload.github.com/relayr/xdk-mqtt/zip/master), or [here](https://github.com/relayr/xdk-mqtt/tree/dev-ev), and uncompress it in "C:/" (in the root folder of the hard drive!).
-6.  Install it with the default options, and in the folder that the installer wants.
-7.  If you did everything right, at the end of this process, now you should have two new folders in your hard drive, as shown below:
+2.  If you don't have an account, please follow the steps provided by the application to create one. The serial number of your XDK is required to download the workbench.
+3.  Log in with your Bosch account and download the [XDK Workbench (release 1.6.0)](http://xdk.bosch-connectivity.com/software-downloads).
+4.  Install it with the default options (i.e. don't modify the default folder or anything).
+5.  Download the latest version of the repository with the relayr [XDK project](https://codeload.github.com/relayr/xdk-mqtt/zip/master), or [here](https://github.com/relayr/xdk-mqtt/tree/dev-ev), and uncompress it in "C:/" (in the root folder of the hard drive).
+6.  Install it with the default options in the folder chosen by the installer.
+7.  You should now have two new folders on your hard drive as shown below:
     
 ![folders](assets/ScreenShot_2016-09-15_at_14.52.28.png)
  
  
 ## 5. Importing the project into XDK Workbench
 
-Now let's import the project in the XDK Workbench, so you can flash your own XDKs from now on:
+Now let's import the project into the XDK Workbench so that we cna flash the XDK:
 
 1.  Open the XDK Workbench.  
   ![XDK workbench](assets/xdk_icon.png)
 2.  The first time you open it, it will ask you to set a password. Ignore this (click "No") and continue.
-3.  Close the Welcome tab that displays upon opening the program.
-**IMPORTANT: DO NOT UPGRADE THE WORKBENCH! IGNORE THE "NEW VERSION" MESSAGES!**
+3.  Close the Welcome tab that displays upon opening the program.  
+  **IMPORTANT: DO NOT UPGRADE THE WORKBENCH! IGNORE THE "NEW VERSION" MESSAGES!**
 4.  Next, click on "File" → "New" → "Project".
 5.  Inside the category "C/C++", select "Makefile Project with Existing Code."  
   ![Import project](assets/ScreenShot_2016-05-13_at_12.23.34.png)
-6.  In the following window, enter a name for your project, choose the location where you put the relayr XDK project, and select the **BCDS XDK Toolchain.**  
+6.  In the following window, enter a name for your project, select the location of the relayr XDK project, and select the **BCDS XDK Toolchain.**  
   ![Import project2](assets/ScreenShot_2016-05-13_at_12.26.59.png)
 7.  Click on "Finish," and you'll see the brand new project added in the Project Explorer column on the left.
  
@@ -79,15 +83,15 @@ will need to make XDK available in VirtualBox.
 
 ### Make XDK available in VirtualBox
 
-*IMPORTANT: If you're not using a virtual machine, you can skip this first
+**IMPORTANT: If you're not using a virtual machine, you can skip this first
 set of steps and skip to the WiFi and MQTT credential sections below. Just
 connect your XDK to the USB and turn it on by flipping the small switch on the
-side of the device).*
+side of the device).**
 
 1.  On the top navigation bar of VirtualBox, click on "Devices" → "USB" → "USB settings..."
 2.  Now connect the XDK to a USB port, and turn it on (switch on the side of the device).
 3.  Click on the small green icon on the right, and select the Bosch XDK.
-4.  With this, you just created a filter that will give the virtual machine access to the USB device (i.e. your XDK). Now, disconnect the cable of the XDK, and close the window.
+4.  With this, you just created a filter that will give the virtual machine access to the USB device (i.e. your XDK). Now, disconnect the cable of the XDK and close the window.
 5.  Now, once back in the Workbench, connect the cable of the XDK again. You should hear a sound indicating that a USB device has been connected, and on the top left side of the workbench, your XDK should be shown in green.
  
 ### WiFi credentials
@@ -101,7 +105,7 @@ Follow these steps to configure the XDK with the credentials of the WiFi network
   
 ### MQTT credentials
 
- In order to retrieve the XDK's MQTT credentials, we'll have to create the device on the [relayr Developer Dashboard](http://developer.relayr.io), for which you'll need a relayr developer account. [Click here for instructions.](http://docs.relayr.io/getting-started/account-creation/#creating-an-account)
+ In order to retrieve the XDK's MQTT credentials, we'll have to create the device on the [relayr Developer Dashboard](http://developer.relayr.io), for which you'll need a relayr developer account. [Click here for instructions on how to make an account.](http://docs.relayr.io/getting-started/account-creation/#creating-an-account)
 
  When you've created your account, [follow these instructions on how to add your device to the cloud.](http://docs.relayr.io/getting-started/devices-guide/#adding-a-device) When selecting a model, go to the "By the community" section and, in the search box, type "XDK." Select the one highlighted in the screenshot below:  
 
@@ -155,7 +159,7 @@ list and add it again after disconnecting and reconnecting it!
 
 Once the device is flashed, simply disconnect and reset it (with the switch on
 the side). After rebooting, it should start publishing data to the cloud.
- 
+
  
 ## 8. Check XDK onboarding
 
