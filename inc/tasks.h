@@ -5,10 +5,9 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-extern int tickPeriod;
-
 uint8_t Tasks_init(void);
 void Tasks_restart(void);
+void Tasks_PublishPeriod(uint32_t period);
 
 typedef enum task_states {
     WIFI_INIT = 0, //

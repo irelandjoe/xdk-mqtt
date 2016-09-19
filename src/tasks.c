@@ -12,6 +12,7 @@
 #include <queue.h>
 #include "processcheck_task.h"
 #include "logging.h"
+#include "xdkwdog.h"
 
 #define PUBLISH_PERIOD  3000;
 #define MQTT_CONN_MAX_FAILS	5
@@ -35,7 +36,7 @@ static const uint32_t RECONNECT_PERIOD = 4000;
 static const uint32_t TASK_STACK_SIZE = 8000;
 static const uint32_t TASK_PRIO = 4;
 
-int tickPeriod = PUBLISH_PERIOD;
+uint32_t tickPeriod = PUBLISH_PERIOD;
 
 uint8_t Tasks_init(void)
 {
@@ -52,16 +53,21 @@ uint8_t Tasks_init(void)
 	if (NULL == sysTickIntHandle)
 	{
 	    FATAL_PRINT("Not enough memory to create uptime Timer!");
+	    return 0;
 	}
 	else if(pdFAIL == xTimerStart(sysTickIntHandle, 0xFFFF))
 	{
 	    FATAL_PRINT("Not enough memory to start uptime Timer!");
+	    return 0;
 	}
 
 	if (xSemaphore == NULL)
 	{
 	    FATAL_PRINT("Error occurred in creating mutex");
+	    return 0;
 	}
+
+	return 1;
 
 }
 
@@ -187,7 +193,19 @@ static uint8_t Tick(void)
     return 0;
 }
 
+/*
+ * period - publish period in ms
+ */
+void Tasks_PublishPeriod(uint32_t period)
+{
+	if (period == 0)
+		period = PUBLISH_PERIOD;
+
+	tickPeriod = period;
+}
+
 void CommandHandlerInit(void)
 {
+	MqttSubscribe(&CommandConfigHandler);
     TASK_CREATE_WITHCHECK(MqttYield, (const char *) "MQTT Commands", 1000, TASK_PRIO - 1, mqttYieldTaskHandle);
 }
