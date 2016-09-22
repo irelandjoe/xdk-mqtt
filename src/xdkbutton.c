@@ -39,7 +39,7 @@ int EnableButton(BUTTON_handle_tp* buttonHandle)
     buttonReturn = BUTTON_enable(*buttonHandle);
     if(BUTTON_ERROR_OK != buttonReturn)
     {
-    	WARN_PRINT("Enabling Button failed with status = %d!", (int)buttonReturn);
+        WARN_PRINT("Enabling Button failed with status = %d!", (int)buttonReturn);
         ret = -1;
     }
     return ret;
@@ -52,7 +52,7 @@ int SetButtonCallback(BUTTON_handle_tp* buttonHandle, buttonHandler handler)
     buttonReturn = BUTTON_setCallback(*buttonHandle, handler, BUTTONONE);
     if(BUTTON_ERROR_OK != buttonReturn)
     {
-    	WARN_PRINT("Setting callback for button failed with status = %d!", (int)buttonReturn);
+        WARN_PRINT("Setting callback for button failed with status = %d!", (int)buttonReturn);
         ret = -1;
     }
     return ret;

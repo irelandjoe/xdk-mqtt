@@ -46,7 +46,7 @@ void AccelGetData(SensorData* data)
     returnValue = Accelerometer_readXyzLsbValue(xdkAccelerometers_BMA280_Handle, &getaccelData);
     if(SENSOR_SUCCESS == returnValue)
     {
-         TRACE_PRINT("%s Raw Data : x = %ld, y = %ld, z = %ld",
+    	TRACE_PRINT("%s Raw Data : x = %ld, y = %ld, z = %ld",
                ACCEL_LABEL,
                (long int)getaccelData.xAxisData,
                (long int)getaccelData.yAxisData,
@@ -62,7 +62,7 @@ void AccelGetData(SensorData* data)
     if(SENSOR_SUCCESS == returnValue)
     {
         FillAccelData(data, &getaccelData);
-         TRACE_PRINT("%s Gravity Data : x = %ld mg, y = %ld mg, z = %ld mg",
+        TRACE_PRINT("%s Gravity Data : x = %ld mg, y = %ld mg, z = %ld mg",
                ACCEL_LABEL,
                (long int)getaccelData.xAxisData,
                (long int)getaccelData.yAxisData,

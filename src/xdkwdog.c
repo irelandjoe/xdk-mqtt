@@ -32,22 +32,22 @@ void XdkWDog_Init(void)
 
 void XdkWdog_Feed(void)
 {
-	WDOG_Feed();
+    WDOG_Feed();
 }
 
 void XdkWdog_RestartByWdog(void)
 {
-	WDOG_Init_TypeDef wdConfig = { false,              /* Do not Start watchdog when init done */
-								   false,              /* WDOG not counting during debug halt */
-								   false,              /* WDOG not counting when in EM2 */
-								   false,              /* WDOG not counting when in EM3 */
-								   false,              /* EM4 can be entered */
-								   false,              /* Do not block disabling LFRCO/LFXO in CMU */
-								   false,              /* Do not lock WDOG configuration (if locked, reset needed to unlock) */
-								   wdogClkSelLFXO,     /* Select 32768HZ LFXO as clock source for WDOG oscillator */
-								   wdogPeriod_9     /* Set longest possible timeout period */
-								};
-	WDOG_Enable(false);
-	WDOG_Init(&wdConfig);
-	WDOG_Enable(true);
+    WDOG_Init_TypeDef wdConfig = { false,              /* Do not Start watchdog when init done */
+                                   false,              /* WDOG not counting during debug halt */
+                                   false,              /* WDOG not counting when in EM2 */
+                                   false,              /* WDOG not counting when in EM3 */
+                                   false,              /* EM4 can be entered */
+                                   false,              /* Do not block disabling LFRCO/LFXO in CMU */
+                                   false,              /* Do not lock WDOG configuration (if locked, reset needed to unlock) */
+                                   wdogClkSelLFXO,     /* Select 32768HZ LFXO as clock source for WDOG oscillator */
+                                   wdogPeriod_9     /* Set longest possible timeout period */
+                                };
+    WDOG_Enable(false);
+    WDOG_Init(&wdConfig);
+    WDOG_Enable(true);
 }

@@ -74,6 +74,6 @@ void EnvSensorGetData(SensorData* data)
     }
     else
     {
-    	WARN_PRINT("%s Conversion Data read FAILED", ENV_SENSOR_LABEL);
+        WARN_PRINT("%s Conversion Data read FAILED", ENV_SENSOR_LABEL);
     }
 }

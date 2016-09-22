@@ -31,7 +31,7 @@ int WiFiInit()
 
     if(0 == wifiInitDone && WLI_SUCCESS != WLI_init())
     {
-    	ERR_PRINT("Error occurred initializing WLAN");
+        ERR_PRINT("Error occurred initializing WLAN");
         return retVal;
     }
 
@@ -61,7 +61,7 @@ int WiFiInit()
 
 int WiFiDeinit(void)
 {
-	DEBUG_PRINT("WiFi disconnect!");
+    DEBUG_PRINT("WiFi disconnect!");
     return WLI_disconnect(NULL);
 }
 

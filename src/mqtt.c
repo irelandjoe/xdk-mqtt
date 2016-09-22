@@ -29,7 +29,7 @@ static int32_t MQTT_YIELD_TIMEOUT = 50;
 
 int MqttInit(void)
 {
-	DEBUG_PRINT("Mqtt Init");
+    DEBUG_PRINT("Mqtt Init");
 
     MqttErrorCode returnValue = FAILURE;
     NewNetwork(&mqttNet);
@@ -54,7 +54,7 @@ int MqttReconnect(void)
 
 void MqttDeinit(void)
 {
-	DEBUG_PRINT("Mqtt disconnect!");
+    DEBUG_PRINT("Mqtt disconnect!");
     mqttNet.disconnect(&mqttNet);
 }
 
@@ -82,7 +82,7 @@ int MqttSubscribe(messageHandler callback)
 
 void MqttYield(void* context)
 {
-	context = context;
+    context = context;
     for (;;)
     {
         ProcessCheck_ControlFlag(xTaskGetCurrentTaskHandle());
@@ -117,14 +117,14 @@ MqttErrorCode MqttConnect(void)
         ret = MQTTConnect(&mqttClient, &data);
         if(SUCCESS == ret)
         {
-        	DEBUG_PRINT("Connected %d", ret);
+            DEBUG_PRINT("Connected %d", ret);
         }
         else
         {
-        	ERR_PRINT("Mqtt Connection failed!");
+            ERR_PRINT("Mqtt Connection failed!");
         }
     } else {
-    	ERR_PRINT("Connect network failed - %d", ret);
+        ERR_PRINT("Connect network failed - %d", ret);
     }
     return ret;
 }

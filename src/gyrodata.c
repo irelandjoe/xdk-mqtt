@@ -48,7 +48,7 @@ void GyroGetData(SensorData* data)
     returnValue = Gyroscope_readXyzValue(xdkGyroscope_BMG160_Handle, &getRawData);
     if(SENSOR_SUCCESS == returnValue)
     {
-    	TRACE_PRINT("%s Raw Data : x = %ld, y = %ld, z = %ld",
+        TRACE_PRINT("%s Raw Data : x = %ld, y = %ld, z = %ld",
                GYRO_LABEL,
                (long int)getRawData.xAxisData,
                (long int)getRawData.yAxisData,
@@ -73,6 +73,6 @@ void GyroGetData(SensorData* data)
     }
     else
     {
-    	WARN_PRINT("%s Converted Data read FAILED", GYRO_LABEL);
+        WARN_PRINT("%s Converted Data read FAILED", GYRO_LABEL);
     }
 }

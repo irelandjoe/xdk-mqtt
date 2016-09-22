@@ -45,44 +45,43 @@ uint8_t Tasks_init(void)
     TASK_CREATE_WITHCHECK(Tasks_stateMachine, (const char *) "State machine", TASK_STACK_SIZE, TASK_PRIO, mainTaskHandle);
 
     sysTickIntHandle = xTimerCreate((const char *) "uptime",
-									( 1000 / portTICK_PERIOD_MS ),
-									pdTRUE,
-	                                0,
-									Tasks_Uptime);
+                                    ( 1000 / portTICK_PERIOD_MS ),
+                                    pdTRUE,
+                                    0,
+                                    Tasks_Uptime);
 
-	if (NULL == sysTickIntHandle)
-	{
-	    FATAL_PRINT("Not enough memory to create uptime Timer!");
-	    return 0;
-	}
-	else if(pdFAIL == xTimerStart(sysTickIntHandle, 0xFFFF))
-	{
-	    FATAL_PRINT("Not enough memory to start uptime Timer!");
-	    return 0;
-	}
+    if (NULL == sysTickIntHandle)
+    {
+        FATAL_PRINT("Not enough memory to create uptime Timer!");
+        return 0;
+    }
+    else if(pdFAIL == xTimerStart(sysTickIntHandle, 0xFFFF))
+    {
+        FATAL_PRINT("Not enough memory to start uptime Timer!");
+        return 0;
+    }
 
-	if (xSemaphore == NULL)
-	{
-	    FATAL_PRINT("Error occurred in creating mutex");
-	    return 0;
-	}
+    if (xSemaphore == NULL)
+    {
+        FATAL_PRINT("Error occurred in creating mutex");
+        return 0;
+    }
 
-	return 1;
+    return 1;
 
 }
 
 void Tasks_restart(void)
 {
-	if (xSemaphoreTake(xSemaphore, ( TickType_t ) 10) == pdTRUE)
-	{
-	    restart = 1;
-	    xSemaphoreGive(xSemaphore);
-	}
-	else
-	{
-	    WARN_PRINT("Cannot take the semaphore!");
-	}
-
+    if (xSemaphoreTake(xSemaphore, ( TickType_t ) 10) == pdTRUE)
+    {
+        restart = 1;
+        xSemaphoreGive(xSemaphore);
+    }
+    else
+    {
+        WARN_PRINT("Cannot take the semaphore!");
+    }
 }
 
 static void Tasks_Uptime(void *params)
@@ -94,102 +93,102 @@ static void Tasks_Uptime(void *params)
 
 static void Tasks_stateMachine(void *context)
 {
-	TASK_STATES state = WIFI_INIT;
-	context = context;
+    TASK_STATES state = WIFI_INIT;
+    context = context;
 
-	uint8_t fail_count = 0;
-	while (1)
-	{
+    uint8_t fail_count = 0;
+    while (1)
+    {
 
-		ProcessCheck_ControlFlag(xTaskGetCurrentTaskHandle());
+        ProcessCheck_ControlFlag(xTaskGetCurrentTaskHandle());
 
-		if (xSemaphoreTake(xSemaphore, ( TickType_t ) 10) == pdTRUE)
-		{
-			if (restart)
-			{
-				state = RESTART;
-				restart = 0;
-			}
-			xSemaphoreGive(xSemaphore);
-		}
+        if (xSemaphoreTake(xSemaphore, ( TickType_t ) 10) == pdTRUE)
+        {
+            if (restart)
+            {
+                state = RESTART;
+                restart = 0;
+            }
+            xSemaphoreGive(xSemaphore);
+        }
 
-		switch (state) {
-		case WIFI_INIT:
-			if (WiFiInit() >= 0)
-			{
-				state = MQTT_CONN;
-			}
-			else
-			{
-				vTaskDelay(RECONNECT_PERIOD / portTICK_RATE_MS);
-			}
-			break;
-		case MQTT_CONN:
-			if (0 == MqttInit()) {
-				state = MQTT_SUB;
-			}
-			if (fail_count++ > MQTT_CONN_MAX_FAILS) {
-				state = RESTART;
-				fail_count = 0;
-			}
-			else
-			{
-				vTaskDelay(RECONNECT_PERIOD / portTICK_RATE_MS);
-			}
-			break;
-		case MQTT_SUB:
-			CommandHandlerInit();
-			state = RUNNING_STATE;
-			break;
-		case RUNNING_STATE:
-			if (Tick())
-			{
-				state = RESTART;
-			}
-			else
-			{
-				vTaskDelay(tickPeriod / portTICK_RATE_MS);
-			}
-			break;
-		case ERROR_STATE:
-			//watchdog restart
-			//not in used
-			break;
-		case RESTART:
-			DEBUG_PRINT("Restarting by WDG");
-			XdkWdog_RestartByWdog();
-			vTaskDelay(3000 / portTICK_RATE_MS);
-			break;
-		}
-	}
+        switch (state) {
+        case WIFI_INIT:
+            if (WiFiInit() >= 0)
+            {
+                state = MQTT_CONN;
+            }
+            else
+            {
+                vTaskDelay(RECONNECT_PERIOD / portTICK_RATE_MS);
+            }
+            break;
+        case MQTT_CONN:
+            if (0 == MqttInit()) {
+                state = MQTT_SUB;
+            }
+            if (fail_count++ > MQTT_CONN_MAX_FAILS) {
+                state = RESTART;
+                fail_count = 0;
+            }
+            else
+            {
+                vTaskDelay(RECONNECT_PERIOD / portTICK_RATE_MS);
+            }
+            break;
+        case MQTT_SUB:
+            CommandHandlerInit();
+            state = RUNNING_STATE;
+            break;
+        case RUNNING_STATE:
+            if (Tick())
+            {
+                state = RESTART;
+            }
+            else
+            {
+                vTaskDelay(tickPeriod / portTICK_RATE_MS);
+            }
+            break;
+        case ERROR_STATE:
+            //watchdog restart
+            //not in used
+            break;
+        case RESTART:
+            DEBUG_PRINT("Restarting by WDG");
+            XdkWdog_RestartByWdog();
+            vTaskDelay(3000 / portTICK_RATE_MS);
+            break;
+        }
+    }
 }
 
 
 static uint8_t Tick(void)
 {
-	SensorData data;
+    SensorData data;
 
-	for(uint32_t sensor = 0; sensor < NUM_SENSORS; ++sensor)
-	{
-		if(enabledSensors[sensor])
-		{
-			// Get data
-			sensors[sensor](&data);
+    for(uint32_t sensor = 0; sensor < NUM_SENSORS; ++sensor)
+    {
+        if(enabledSensors[sensor])
+        {
+            // Get data
+            sensors[sensor](&data);
 
-			for(uint32_t meas = 0; meas < data.numMeas; ++meas)
-			{
-				if(0 > MqttSendData(&data.meas[meas]))
-				{
-					DEBUG_PRINT("Sending data FAILED! Restarting WiFi and MQTT!");
-					return 1;
-				}
-				else
-				{
-					LedSet(ORANGE_LED, LED_SET_TOGGLE);
-				}
-			}
-		}
-	}
+            for(uint32_t meas = 0; meas < data.numMeas; ++meas)
+            {
+                if(0 > MqttSendData(&data.meas[meas]))
+                {
+                    DEBUG_PRINT("Sending data FAILED! Restarting WiFi and MQTT!");
+                    return 1;
+                }
+                else
+                {
+                    LedSet(ORANGE_LED, LED_SET_TOGGLE);
+                }
+            }
+        }
+    }
     return 0;
 }
 
@@ -198,14 +197,14 @@ static uint8_t Tick(void)
  */
 void Tasks_PublishPeriod(uint32_t period)
 {
-	if (period == 0)
-		period = PUBLISH_PERIOD;
+    if (period == 0)
+        period = PUBLISH_PERIOD;
 
-	tickPeriod = period;
+    tickPeriod = period;
 }
 
 void CommandHandlerInit(void)
 {
-	MqttSubscribe(&CommandConfigHandler);
+    MqttSubscribe(&CommandConfigHandler);
     TASK_CREATE_WITHCHECK(MqttYield, (const char *) "MQTT Commands", 1000, TASK_PRIO - 1, mqttYieldTaskHandle);
 }

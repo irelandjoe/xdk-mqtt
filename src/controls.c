@@ -63,7 +63,7 @@ void CommandConfigHandler(MessageData* data)
     {
         if(IsName("name", commandJson + tokens[tokIdx].start, 4))
         {
-        	nameToken = tokIdx;
+            nameToken = tokIdx;
         }
         else if(IsName("path", commandJson + tokens[tokIdx].start, 4))
         {
@@ -77,13 +77,13 @@ void CommandConfigHandler(MessageData* data)
 
     if ((nameToken != -1) && (pathToken != -1) && (valueToken != -1))
     {
-		for (unsigned int i = 0; i < sizeof(subcmds)/sizeof(SubscribeCmd); i++)
-		{
-			if (IsName(subcmds[i].name, commandJson + tokens[nameToken+1].start, strlen(subcmds[i].name) ))
-			{
-				subcmds[i].cmdFn(commandJson, tokens + pathToken +1 , tokens + valueToken +1);
-			}
-		}
+        for (unsigned int i = 0; i < sizeof(subcmds)/sizeof(SubscribeCmd); i++)
+        {
+            if (IsName(subcmds[i].name, commandJson + tokens[nameToken+1].start, strlen(subcmds[i].name) ))
+            {
+                subcmds[i].cmdFn(commandJson, tokens + pathToken +1 , tokens + valueToken +1);
+            }
+        }
     }
 
 }
@@ -105,7 +105,7 @@ static void LedControl(const char* json, jsmntok_t* path, jsmntok_t* val)
     }
     else if(0 != value)
     {
-    	WARN_PRINT("Unknown led op = %d", value);
+        WARN_PRINT("Unknown led op = %d", value);
         return;
     }
 
@@ -141,8 +141,8 @@ void PeriodControl(const char* json, jsmntok_t* command, jsmntok_t* val)
     {
         if(IsName("publish", json + command->start, 7))
         {
-        	DEBUG_PRINT("publish period %d", value);
-        	Tasks_PublishPeriod(value * 1000);
+            DEBUG_PRINT("publish period %d", value);
+            Tasks_PublishPeriod(value * 1000);
         }
         else if(IsName("subscribe", json + command->start, 9))
         {
@@ -150,12 +150,12 @@ void PeriodControl(const char* json, jsmntok_t* command, jsmntok_t* val)
         }
         else
         {
-        	WARN_PRINT("Unknown period = %d", value);
+            WARN_PRINT("Unknown period = %d", value);
         }
     }
     else
     {
-    	WARN_PRINT("Wrong meas period = %d", value);
+        WARN_PRINT("Wrong meas period = %d", value);
     }
 }
 
