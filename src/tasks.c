@@ -5,6 +5,8 @@
 #include "mqtt.h"
 #include "wifi.h"
 #include "controls.h"
+#include <FreeRTOS.h>
+#include <projdefs.h>
 
 static void Tick(void* context);
 static void MqttConnectionTask(void* context);
@@ -12,11 +14,11 @@ static void MqttSubscriptionTask(void* context);
 static void WifiConnectionCallback(int status);
 static void WifiReconnect(void* context);
 
-xTaskHandle* tickTaskHandle = NULL;
-static xTaskHandle* commandTaskHandle;
-static xTaskHandle* reconnectTaskHandle;
-static xTaskHandle* subscriptionTaskHandle;
-static xTaskHandle* wifiReconnectHandle;
+xTaskHandle tickTaskHandle;
+static xTaskHandle commandTaskHandle;
+static xTaskHandle reconnectTaskHandle;
+static xTaskHandle subscriptionTaskHandle;
+static xTaskHandle wifiReconnectHandle;
 
 static uint32_t PUBLISH_PERIOD = 3000;
 static const uint32_t COMMAND_PERIOD = 1000;
@@ -31,14 +33,15 @@ static bool wifiConnected = false;
 void TickInit(void)
 {
     WDOG_Feed();
-    int8_t retValPerSwTimer = errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
+    int8_t retValPerSwTimer = pdFAIL;
     retValPerSwTimer = xTaskCreate(Tick,
-                                   (const int8_t *) "PublishData",
-                                   TASK_STACK_SIZE,
-                                   TASK_PRIO - 2,
-                                   tickTaskHandle);
+                                     (const int8_t *) "PublishData",
+                                     TASK_STACK_SIZE,
+									 NULL,
+                                     TASK_PRIO - 2,
+                                     &tickTaskHandle);
 
-    if(OS_ERR_NO_ERROR != retValPerSwTimer)
+    if(pdFAIL == retValPerSwTimer)
     {
         printf("Not enough memory to start Tick Timer!");
         return;
@@ -78,7 +81,7 @@ static void Tick(void* context)
                     if(0 > MqttSendData(&data.meas[meas]))
                     {
                         // TODO: Check why taskDelete/taskSuspend deletes/suspens __current__ thread
-                        // vTaskDelete(commandTaskHandle);
+                        // OS_taskDelete(commandTaskHandle);
                         MqttStopPolling();
                         printf("Sending data FAILED! Restarting WiFi and MQTT!\n");
                         Restart();
@@ -106,24 +109,26 @@ void Restart(void)
     printf("WiFi deinit = %d\n\r", WiFiDeinit());
     wifiConnected = false;
     MqttConnectInit();
-    OS_taskCreate(WifiReconnect,
+    xTaskCreate(WifiReconnect,
                   (const int8_t *) "WiFi Reconnection",
                   TASK_STACK_SIZE,
+                  NULL,
                   TASK_PRIO - 1,
-                  wifiReconnectHandle);
+                  &wifiReconnectHandle);
 }
 
 void CommandHandlerInit(void)
 {
     WDOG_Feed();
-    int8_t retValPerSwTimer = OS_ERR_NOT_ENOUGH_MEMORY;
-    retValPerSwTimer = OS_taskCreate(MqttYield,
+    int8_t retValPerSwTimer = pdFAIL;
+    retValPerSwTimer = xTaskCreate(MqttYield,
                                      (const int8_t *) "MQTT Commands",
                                      TASK_STACK_SIZE,
+                                     NULL,
                                      TASK_PRIO,
                                      commandTaskHandle);
 
-    if(OS_ERR_NO_ERROR != retValPerSwTimer)
+    if(pdFAIL == retValPerSwTimer)
     {
         printf("Error occurred in creating MQTT command task \n\r");
     }
@@ -140,9 +145,10 @@ void WifiConnectInit(void)
     if(-1 == WiFiInit(&WifiConnectionCallback))
     {
         printf("Connection to WLAN failed. Retrying in %d ms\n", (int)RECONNECT_PERIOD);
-        OS_taskCreate(WifiReconnect,
+        xTaskCreate(WifiReconnect,
                       (const int8_t *) "WiFi Reconnection",
                       TASK_STACK_SIZE,
+                      NULL,
                       TASK_PRIO - 1,
                       wifiReconnectHandle);
     }
@@ -170,9 +176,10 @@ void WifiReconnect(void* context)
 void MqttConnectInit(void)
 {
     WDOG_Feed();
-    OS_taskCreate(MqttConnectionTask,
+    xTaskCreate(MqttConnectionTask,
                   (const int8_t *) "MQTT Connection",
                   TASK_STACK_SIZE,
+				  NULL,
                   TASK_PRIO - 2,
                   reconnectTaskHandle);
 }
@@ -180,9 +187,10 @@ void MqttConnectInit(void)
 void MqttSubscriptionInit(void)
 {
     WDOG_Feed();
-    OS_taskCreate(MqttSubscriptionTask,
+    xTaskCreate(MqttSubscriptionTask,
                   (const int8_t *) "MQTT Subscription",
                   TASK_STACK_SIZE,
+				  NULL,
                   TASK_PRIO - 2,
                   subscriptionTaskHandle);
 }

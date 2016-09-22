@@ -4,8 +4,6 @@
 
 #include "mqtt.h"
 #include "MQTTClient.h"
-#include <FreeRTOS.h>
-#include <task.h>
 
 // auto generated file with credentials
 #include "credentials.h"
