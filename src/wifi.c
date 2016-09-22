@@ -10,7 +10,6 @@
 #include "em_wdog.h"
 #include "logging.h"
 
-// auto generated file with credentials
 #include "credentials.h"
 
 static int wifiInitDone = 0;

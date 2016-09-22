@@ -8,7 +8,6 @@
 #include <task.h>
 #include "processcheck_task.h"
 
-// auto generated file with credentials
 #include "credentials.h"
 
 #include "logging.h"

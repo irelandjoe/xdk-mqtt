@@ -9,6 +9,7 @@
 #include <task.h>
 #include <timers.h>
 
+#include "tasks.h"
 #include "logging.h"
 
 #define MAX_TOKENS 20
