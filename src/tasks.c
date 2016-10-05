@@ -18,7 +18,7 @@
 #define MQTT_CONN_MAX_FAILS	5
 
 
-static uint8_t Tick(void);
+static XDK_Retcode_E Tick(void);
 static void Tasks_stateMachine(void *context);
 static void Tasks_Uptime(void *params);
 static void Tasks_CommandHandlerInit(void);
