@@ -2,6 +2,7 @@
 #include "XdkSensorHandle.h"
 #include "gyrodata.h"
 
+#include "retcode.h"
 #include "logging.h"
 
 static const char GYRO_LABEL[] = "BMG160 Gyroscope";
@@ -24,7 +25,7 @@ static Retcode_T GyroPrivateInit(void* handle)
     return Gyroscope_init((Gyroscope_HandlePtr_T)handle);
 }
 
-uint8_t GyroInit(void)
+XDK_Retcode_E GyroInit(void)
 {
     return SensorInit(&GyroPrivateInit,
                xdkGyroscope_BMG160_Handle,

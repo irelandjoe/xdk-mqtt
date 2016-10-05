@@ -10,6 +10,7 @@
 #include <projdefs.h>
 #include <task.h>
 
+#include "retcode.h"
 #include "xdkwdog.h"
 #include "logging.h"
 
@@ -27,10 +28,10 @@ static xTaskHandle mainTaskHandle;
 
 static void ProcessCheck_Task(void *context)
 {
-    uint8_t i = 0;
 
     while (1)
     {
+        uint8_t i = 0;
         for (i = 0; i < PROCESSCHECK_MAXPROCS; i++)
         {
             if (abTaskFlags[i].nState == -1)
@@ -51,7 +52,7 @@ static void ProcessCheck_Task(void *context)
     }
 }
 
-uint8_t ProcessCheck_Init(void)
+XDK_Retcode_E ProcessCheck_Init(void)
 {
     uint8_t i = 0;
     for (i = 0; i < PROCESSCHECK_MAXPROCS; i++)
@@ -66,9 +67,9 @@ uint8_t ProcessCheck_Init(void)
             tskIDLE_PRIORITY, &mainTaskHandle);
 
     if (mainTaskHandle == NULL)
-    	return 0;
+    	return XDK_RETCODE_FAILURE;
 
-    return 1;
+    return XDK_RETCODE_SUCCESS;
 }
 
 void ProcessCheck_RegisterProc(xTaskHandle pvProc, const char * const name)

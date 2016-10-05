@@ -9,7 +9,7 @@
 #include "processcheck_task.h"
 
 #include "credentials.h"
-
+#include "retcode.h"
 #include "logging.h"
 
 static MqttErrorCode MqttConnect(void);
@@ -27,17 +27,18 @@ static bool deletePolling = false;
 static uint32_t pollingPeriod = 1000;
 static int32_t MQTT_YIELD_TIMEOUT = 50;
 
-int MqttInit(void)
+XDK_Retcode_E MqttInit(void)
 {
     DEBUG_PRINT("Mqtt Init");
 
-    MqttErrorCode returnValue = FAILURE;
+    XDK_Retcode_E returnValue = XDK_RETCODE_FAILURE;
     NewNetwork(&mqttNet);
-    returnValue = MqttConnect();
-    if(SUCCESS == returnValue)
+
+    if(SUCCESS == MqttConnect())
     {
         DEBUG_PRINT("Mqtt Success");
         deletePolling = false;
+        returnValue = XDK_RETCODE_SUCCESS;
     }
     else
     {
@@ -47,9 +48,12 @@ int MqttInit(void)
     return returnValue;
 }
 
-int MqttReconnect(void)
+XDK_Retcode_E MqttReconnect(void)
 {
-    return MqttConnect();
+    if (MqttConnect() == SUCCESS)
+        return XDK_RETCODE_SUCCESS;
+
+    return XDK_RETCODE_FAILURE;
 }
 
 void MqttDeinit(void)

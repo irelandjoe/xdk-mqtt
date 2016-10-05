@@ -2,6 +2,7 @@
 #include "XdkSensorHandle.h"
 #include "lightdata.h"
 
+#include "retcode.h"
 #include "logging.h"
 
 static const char LIGHT_SENSOR_LABEL[] = "MAX09 Light Sensor";
@@ -23,7 +24,7 @@ Retcode_T LightPrivateInit(void* handle)
     return LightSensor_init((LightSensor_HandlePtr_T)handle);
 }
 
-uint8_t LightInit(void)
+XDK_Retcode_E LightInit(void)
 {
     return SensorInit(&LightPrivateInit,
                xdkLightSensor_MAX44009_Handle,

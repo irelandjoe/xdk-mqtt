@@ -5,7 +5,9 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-uint8_t Tasks_init(void);
+#include "retcode.h"
+
+XDK_Retcode_E Tasks_init(void);
 void Tasks_restart(void);
 void Tasks_PublishPeriod(uint32_t period);
 

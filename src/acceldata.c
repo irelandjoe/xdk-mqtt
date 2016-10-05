@@ -2,6 +2,7 @@
 #include "XdkSensorHandle.h"
 #include "acceldata.h"
 #include "logging.h"
+#include "retcode.h"
 
 static const char ACCEL_LABEL[] = "BMA280 Accelerometer";
 
@@ -23,7 +24,7 @@ static Retcode_T AccelPrivateInit(void* handle)
     return Accelerometer_init((Accelerometer_HandlePtr_T)handle);
 }
 
-uint8_t AccelInit(void)
+XDK_Retcode_E AccelInit(void)
 {
     return SensorInit(&AccelPrivateInit,
                xdkAccelerometers_BMA280_Handle,

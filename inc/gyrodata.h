@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "sensordata.h"
+#include "retcode.h"
 
-uint8_t GyroInit(void);
+XDK_Retcode_E GyroInit(void);
 void GyroDeinit(void);
 void GyroGetData(SensorData* data);

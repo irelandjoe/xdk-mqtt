@@ -2,6 +2,7 @@
 #include "XdkSensorHandle.h"
 #include "magnetodata.h"
 
+#include "retcode.h"
 #include "logging.h"
 
 static const char MAGNETO_LABEL[] = "BMM150 Magnetometer";
@@ -24,7 +25,7 @@ Retcode_T PrivateInit(void* handle)
     return Magnetometer_init((Magnetometer_HandlePtr_T)handle);
 }
 
-uint8_t MagnetoInit(void)
+XDK_Retcode_E MagnetoInit(void)
 {
     return SensorInit(&PrivateInit,
                xdkMagnetometer_BMM150_Handle,

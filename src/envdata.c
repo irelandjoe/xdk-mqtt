@@ -1,6 +1,7 @@
 #include "BCDS_Environmental.h"
 #include "XdkSensorHandle.h"
 #include "envdata.h"
+#include "retcode.h"
 
 #include "logging.h"
 
@@ -25,9 +26,9 @@ static Retcode_T EnvPrivateInit(void* handle)
     return Environmental_init((Environmental_HandlePtr_T)handle);
 }
 
-void EnvSensorInit()
+XDK_Retcode_E EnvSensorInit()
 {
-    SensorInit(&EnvPrivateInit,
+    return SensorInit(&EnvPrivateInit,
                xdkEnvironmental_BME280_Handle,
                ENV_SENSOR_LABEL);
 }

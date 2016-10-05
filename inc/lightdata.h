@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "sensordata.h"
+#include "retcode.h"
 
-uint8_t LightInit(void);
+XDK_Retcode_E LightInit(void);
 void LightDeinit(void);
 void LightGetData(SensorData* data);

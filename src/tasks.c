@@ -21,6 +21,7 @@
 static uint8_t Tick(void);
 static void Tasks_stateMachine(void *context);
 static void Tasks_Uptime(void *params);
+static void Tasks_CommandHandlerInit(void);
 
 static xTaskHandle mqttYieldTaskHandle;
 static xTaskHandle mainTaskHandle;
@@ -38,7 +39,7 @@ static const uint32_t TASK_PRIO = 4;
 
 uint32_t tickPeriod = PUBLISH_PERIOD;
 
-uint8_t Tasks_init(void)
+XDK_Retcode_E Tasks_init(void)
 {
     xSemaphore = xSemaphoreCreateMutex();
 
@@ -53,21 +54,21 @@ uint8_t Tasks_init(void)
     if (NULL == sysTickIntHandle)
     {
         FATAL_PRINT("Not enough memory to create uptime Timer!");
-        return 0;
+        return XDK_RETCODE_FAILURE;
     }
     else if(pdFAIL == xTimerStart(sysTickIntHandle, 0xFFFF))
     {
         FATAL_PRINT("Not enough memory to start uptime Timer!");
-        return 0;
+        return XDK_RETCODE_FAILURE;
     }
 
     if (xSemaphore == NULL)
     {
         FATAL_PRINT("Error occurred in creating mutex");
-        return 0;
+        return XDK_RETCODE_FAILURE;
     }
 
-    return 1;
+    return XDK_RETCODE_SUCCESS;
 
 }
 
@@ -84,13 +85,29 @@ void Tasks_restart(void)
     }
 }
 
+
+/**
+ * Uptime counter task
+ */
 static void Tasks_Uptime(void *params)
 {
     uptime++;
     if ((uptime % 60) == 0)
+    {
         DEBUG_PRINT("uptime: %lu (seconds)", uptime);
+    }
 }
 
+/*
+ * FreeRTOS task
+ * State machine :
+ *   1) WiFi connect -> 2
+ *   2) MQTT connect -> 3
+ *   3) Init MQTT subscribe task -> 4
+ *   4) Collecting date from sensors -> 4
+ *
+ * If any problem go to RESTART state - restart by watchdog
+ */
 static void Tasks_stateMachine(void *context)
 {
     TASK_STATES state = WIFI_INIT;
@@ -114,7 +131,7 @@ static void Tasks_stateMachine(void *context)
 
         switch (state) {
         case WIFI_INIT:
-            if (WiFiInit() >= 0)
+            if (WiFiInit() == XDK_RETCODE_SUCCESS)
             {
                 state = MQTT_CONN;
             }
@@ -124,24 +141,29 @@ static void Tasks_stateMachine(void *context)
             }
             break;
         case MQTT_CONN:
-            if (0 == MqttInit()) {
-                state = MQTT_SUB;
-            }
-            if (fail_count++ > MQTT_CONN_MAX_FAILS) {
-                state = RESTART;
-                fail_count = 0;
-            }
-            else
+            if (MqttInit() == XDK_RETCODE_SUCCESS)
             {
-                vTaskDelay(RECONNECT_PERIOD / portTICK_RATE_MS);
+                state = MQTT_SUB;
+            } 
+            else 
+            {
+            	if (fail_count++ > MQTT_CONN_MAX_FAILS)
+            	{
+                	state = RESTART;
+                	fail_count = 0;
+            	}
+            	else
+            	{
+                	vTaskDelay(RECONNECT_PERIOD / portTICK_RATE_MS);
+            	}
             }
             break;
         case MQTT_SUB:
-            CommandHandlerInit();
+            Tasks_CommandHandlerInit();
             state = RUNNING_STATE;
             break;
         case RUNNING_STATE:
-            if (Tick())
+            if (Tick() == XDK_RETCODE_FAILURE)
             {
                 state = RESTART;
             }
@@ -163,8 +185,10 @@ static void Tasks_stateMachine(void *context)
     }
 }
 
-
-static uint8_t Tick(void)
+/**
+ * Collecting data from activated sensors and sending to cloud
+ */
+static XDK_Retcode_E Tick(void)
 {
     SensorData data;
 
@@ -180,7 +204,7 @@ static uint8_t Tick(void)
                 if(0 > MqttSendData(&data.meas[meas]))
                 {
                     DEBUG_PRINT("Sending data FAILED! Restarting WiFi and MQTT!");
-                    return 1;
+                    return XDK_RETCODE_FAILURE;
                 }
                 else
                 {
@@ -189,21 +213,27 @@ static uint8_t Tick(void)
             }
         }
     }
-    return 0;
+    return XDK_RETCODE_SUCCESS;
 }
 
 /*
+ * Set the period of data collecting
  * period - publish period in ms
  */
 void Tasks_PublishPeriod(uint32_t period)
 {
     if (period == 0)
+    {
         period = PUBLISH_PERIOD;
+    }
 
     tickPeriod = period;
 }
 
-void CommandHandlerInit(void)
+/**
+ * Initialization of subscribe task
+ */
+static void Tasks_CommandHandlerInit(void)
 {
     MqttSubscribe(&CommandConfigHandler);
     TASK_CREATE_WITHCHECK(MqttYield, (const char *) "MQTT Commands", 1000, TASK_PRIO - 1, mqttYieldTaskHandle);

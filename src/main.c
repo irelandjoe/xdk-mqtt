@@ -23,6 +23,7 @@
 #include "processcheck_task.h"
 #include "controls.h"
 #include "xdkwdog.h"
+#include "retcode.h"
 #include "logging.h"
 
 
@@ -50,7 +51,11 @@ int main(void)
 void appInitSystem(xTimerHandle xTimer)
 {
     (void) (xTimer);
-    ProcessCheck_Init();
+    if (ProcessCheck_Init() != XDK_RETCODE_SUCCESS)
+    {
+        ERR_PRINT("ProcessCheck cannot be initialized");
+    }
+
     LedInit();
     ButtonOneInit(&ButtonOneCallback);
     MagnetoInit();

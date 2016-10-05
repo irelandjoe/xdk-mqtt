@@ -9,18 +9,20 @@
 #include <FreeRTOS.h>
 #include "em_wdog.h"
 #include "logging.h"
+#include "retcode.h"
 
 #include "credentials.h"
 
 static int wifiInitDone = 0;
 
-int WiFiInit()
+XDK_Retcode_E WiFiInit()
 {
     WDOG_Feed();
 
     DEBUG_PRINT("WiFi Init");
 
-    int retVal = -1;
+    XDK_Retcode_E retVal = XDK_RETCODE_FAILURE;
+
     NCI_ipSettings_t myIpSettings;
     memset(&myIpSettings, (uint32_t) 0, sizeof(myIpSettings));
     Ip_Address_T* IpaddressHex = Ip_getMyIpAddr();
@@ -32,7 +34,7 @@ int WiFiInit()
     if(0 == wifiInitDone && WLI_SUCCESS != WLI_init())
     {
         ERR_PRINT("Error occurred initializing WLAN");
-        return retVal;
+        return XDK_RETCODE_FAILURE;
     }
 
     wifiInitDone = 1;
@@ -49,7 +51,7 @@ int WiFiInit()
         *IpaddressHex = Basics_htonl(myIpSettings.ipV4);
         (void)Ip_convertAddrToString(IpaddressHex,(char *)&ipAddressMy);
         DEBUG_PRINT("Connected - Ip address of the device: %s",ipAddressMy);
-        retVal = 0;
+        retVal = XDK_RETCODE_SUCCESS;
     }
     else
     {
