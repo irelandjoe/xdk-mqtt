@@ -1,5 +1,7 @@
 #!/bin/bash
 
+git clone -b code-refactoring-tomas https://github.com/relayr/xdk-mqtt.git $XDK_MQTT
+
 cd $XDK_MQTT
 make clean
 make

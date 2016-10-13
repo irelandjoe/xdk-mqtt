@@ -17,7 +17,6 @@ ENV XDK_SDK /home/xdk/SDK
 
 RUN mkdir -p $HOMEDIR
 RUN mkdir -p $XDK_SDK
-RUN git clone -b code-refactoring-tomas https://github.com/relayr/xdk-mqtt.git $XDK_MQTT
 
 ## SDK from external directory
 ADD xdk110 $XDK_SDK/xdk110
