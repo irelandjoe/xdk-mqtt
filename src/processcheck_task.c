@@ -31,8 +31,7 @@ static void ProcessCheck_Task(void *context)
 
     while (1)
     {
-        uint8_t i = 0;
-        for (i = 0; i < PROCESSCHECK_MAXPROCS; i++)
+        for (uint8_t i = 0; i < PROCESSCHECK_MAXPROCS; i++)
         {
             if (abTaskFlags[i].nState == -1)
                 break;
@@ -54,8 +53,7 @@ static void ProcessCheck_Task(void *context)
 
 XDK_Retcode_E ProcessCheck_Init(void)
 {
-    uint8_t i = 0;
-    for (i = 0; i < PROCESSCHECK_MAXPROCS; i++)
+    for (uint8_t i = 0; i < PROCESSCHECK_MAXPROCS; i++)
     {
         abTaskFlags[i].taskHandle = NULL;
         abTaskFlags[i].nState = -1;
@@ -74,8 +72,7 @@ XDK_Retcode_E ProcessCheck_Init(void)
 
 void ProcessCheck_RegisterProc(xTaskHandle pvProc, const char * const name)
 {
-    uint8_t i;
-    for (i = 0; i < PROCESSCHECK_MAXPROCS; i++)
+    for (uint8_t i = 0; i < PROCESSCHECK_MAXPROCS; i++)
     {
         if (abTaskFlags[i].nState == -1)
         {
@@ -90,8 +87,7 @@ void ProcessCheck_RegisterProc(xTaskHandle pvProc, const char * const name)
 
 void ProcessCheck_SetMaxState(xTaskHandle pvProc, int nMaxState)
 {
-    uint8_t i;
-    for (i = 0; i < PROCESSCHECK_MAXPROCS; i++)
+    for (uint8_t i = 0; i < PROCESSCHECK_MAXPROCS; i++)
     {
         if (abTaskFlags[i].taskHandle == pvProc)
         {
@@ -103,8 +99,7 @@ void ProcessCheck_SetMaxState(xTaskHandle pvProc, int nMaxState)
 
 void ProcessCheck_ControlFlag(xTaskHandle pvProc)
 {
-    uint8_t i;
-    for (i = 0; i < PROCESSCHECK_MAXPROCS; i++)
+    for (uint8_t i = 0; i < PROCESSCHECK_MAXPROCS; i++)
     {
         if (abTaskFlags[i].taskHandle == pvProc)
         {
