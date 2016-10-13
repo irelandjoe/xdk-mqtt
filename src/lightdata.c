@@ -2,13 +2,16 @@
 #include "XdkSensorHandle.h"
 #include "lightdata.h"
 
+#include "retcode.h"
+#include "logging.h"
+
 static const char LIGHT_SENSOR_LABEL[] = "MAX09 Light Sensor";
 
 
 static void FillLightData(SensorData* data, uint32_t meas)
 {
     data->numMeas = 1;
-    snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "light");
+    snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "luminosity");
 
     snprintf(data->meas[0].value,
              SENSOR_VALUE_SIZE,
@@ -21,9 +24,9 @@ Retcode_T LightPrivateInit(void* handle)
     return LightSensor_init((LightSensor_HandlePtr_T)handle);
 }
 
-void LightInit(void)
+XDK_Retcode_E LightInit(void)
 {
-    SensorInit(&LightPrivateInit,
+    return SensorInit(&LightPrivateInit,
                xdkLightSensor_MAX44009_Handle,
                LIGHT_SENSOR_LABEL);
 }
@@ -45,21 +48,21 @@ void LightGetData(SensorData* data)
     returnValue = LightSensor_readRawData(xdkLightSensor_MAX44009_Handle, &luxRawData);
     if(SENSOR_SUCCESS == returnValue)
     {
-        printf("\n%s Raw Data : %x \n", LIGHT_SENSOR_LABEL, luxRawData);
+        TRACE_PRINT("%s Raw Data : %x", LIGHT_SENSOR_LABEL, luxRawData);
     }
     else
     {
-        printf("%s Raw Data read FAILED\n\r", LIGHT_SENSOR_LABEL);
+        WARN_PRINT("%s Raw Data read FAILED", LIGHT_SENSOR_LABEL);
     }
 
     returnValue = LightSensor_readLuxData(xdkLightSensor_MAX44009_Handle, &milliLuxData);
     if(SENSOR_SUCCESS == returnValue)
     {
         FillLightData(data, milliLuxData);
-        printf("%s Data : %d mlux\n\r", LIGHT_SENSOR_LABEL, (unsigned int)milliLuxData);
+        TRACE_PRINT("%s Data : %d mlux", LIGHT_SENSOR_LABEL, (unsigned int)milliLuxData);
     }
     else
     {
-        printf("%s Data read FAILED\n\r", LIGHT_SENSOR_LABEL);
+    	WARN_PRINT("%s Data read FAILED", LIGHT_SENSOR_LABEL);
     }
 }

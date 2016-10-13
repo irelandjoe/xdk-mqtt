@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "sensordata.h"
+#include "retcode.h"
 
-void MagnetoInit(void);
+XDK_Retcode_E MagnetoInit(void);
 void MagnetoDeinit(void);
 void MagnetoGetData(SensorData* data);

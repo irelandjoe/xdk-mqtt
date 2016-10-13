@@ -1,48 +1,20 @@
-# XDK @ relayr cloud
+# XDK @ relayr cloud and vertex
 
-This is an extension of XDK example app with easy connection to relayr cloud.
-This app uses two libraries as submodules:
-- Eclipse backed Paho MQTT (Embedded C version)
-- Great little JSON parser - JSMN
+## 1. Introduction
 
-# What you need
+This is a XDK firmware with easy connection to relayr cloud or to vertex ([IoT starter kit](https://www.iot-starterkit.de/))
 
-- Grab & install XDK Workbench (app tested with version 1.5)
-- Clone this app and init submodules:
-  - git submodule init
-  - git submodule update
-- Linux/OSX only: debug probe (currently supported: JTAG Lock Pick Tiny 2 via OpenOCD and Segger JLink)
 
-## Extra steps for Linux/OSX (needed only once):
-- Set XDK_SDK environment variable to XDK SDK root directory (the one containing xdk110 folder)
-- Set GCC_ARM environment variable to ARM gcc compiler installation
-- Set SHELLNAMES and SH variables in \<XDK_SDK\>/xdk110/make/application.mk to your current shell (bash, zsh, etc.)
-- Make sure that both GCC ARM and Segger JLink/OpenOCD binaries are available from command line
+## 2. Compile and onboarding
 
-# Running the app
-1. Go to \<THIS_APP_REPO\>
-2. Connect XDK with USB cable (and debug probe on Linux/OSX) and turn it on
-3. Create a device on developer.relayr.io and save the credentials to \<THIS_APP_REPO\>/src/credentials.json
-4. Add your WiFi SSID and password to \<THIS_APP_REPO\>/Makefile
-5. Run: make (or "make flashsegger" or "make flashocd" to build and flash with appropriate debugger)
-6. Enjoy!
+## 2.1 For Windows environment
+This is recommended and supported way.
+ 
+[See this document for instructions](documentation/xdk-onboarding.md) 
 
-# Commands
-Out of the box XDK will send measurements from all sensors to the cloud and reacts on following commands:
+## 2.2 For Linux/MacOS
 
-- Led control:
-  - {"path" : "led", "command" : "\<ledcolor\>", "value" : "0 | 1 | 2"}
-  - value: 0 - off, 1 - on, 2 - toggle
-  - \<ledcolor\>: "red", "yellow", "orange"
-- Period control:
-  - {"path" : "per", "command" : "pub | sub", "value" : "0 - MAXINT32"}
-  - command: pub - publish period, sub - subscribe period
-  - value: number of milliseconds between consecutive sensor reads
-- Sensor control:
-  - {"path" : "sensor", "command" : "\<sensor\>", "value" : "1 | 0"}
-  - values: 0 - off, 1 - on
-  - \<sensor\>: "acc", "gyr", "env", "lgt", "mag"
+**IMPORTANT: For skilled users!!**
 
-# Third party libraries used
-[jsmn](https://github.com/zserge/jsmn) under MIT license
-[Paho](http://git.eclipse.org/c/paho/org.eclipse.paho.mqtt.embedded-c.git) under EPL license
+[See this document](documentation/xdk-linux-dev.md) 
+

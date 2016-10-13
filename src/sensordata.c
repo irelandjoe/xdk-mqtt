@@ -1,16 +1,19 @@
 #include <stdio.h>
 #include "sensordata.h"
+#include "logging.h"
+#include "retcode.h"
 
-void SensorInit(SensorInitializer init, void* handle, const char* label)
+XDK_Retcode_E SensorInit(SensorInitializer init, void* handle, const char* label)
 {
     if(SENSOR_SUCCESS == init(handle))
     {
-        printf("%s initialization Success\n\r", label);
+        DEBUG_PRINT("%s initialization Success", label);
+        return XDK_RETCODE_SUCCESS;
     }
-    else
-    {
-        printf("%s initialization FAILED\n\r", label);
-    }
+
+    ERR_PRINT("%s initialization FAILED", label);
+
+    return XDK_RETCODE_FAILURE;
 }
 
 void SensorDataClear(SensorData* data)

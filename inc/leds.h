@@ -1,6 +1,7 @@
 #pragma once
 
 #include "led.h"
+#include "retcode.h"
 
 static const int RED_LED = 0;
 static const int YELLOW_LED = 1;

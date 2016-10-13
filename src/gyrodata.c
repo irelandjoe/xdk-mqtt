@@ -2,12 +2,15 @@
 #include "XdkSensorHandle.h"
 #include "gyrodata.h"
 
+#include "retcode.h"
+#include "logging.h"
+
 static const char GYRO_LABEL[] = "BMG160 Gyroscope";
 
 static void FillGyroData(SensorData* data, Gyroscope_XyzData_T* meas)
 {
     data->numMeas = 1;
-    snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "gyro");
+    snprintf(data->meas[0].name, SENSOR_NAME_SIZE, "%s", "angularSpeed");
 
     snprintf(data->meas[0].value,
              SENSOR_VALUE_SIZE,
@@ -22,9 +25,9 @@ static Retcode_T GyroPrivateInit(void* handle)
     return Gyroscope_init((Gyroscope_HandlePtr_T)handle);
 }
 
-void GyroInit(void)
+XDK_Retcode_E GyroInit(void)
 {
-    SensorInit(&GyroPrivateInit,
+    return SensorInit(&GyroPrivateInit,
                xdkGyroscope_BMG160_Handle,
                GYRO_LABEL);
 }
@@ -46,7 +49,7 @@ void GyroGetData(SensorData* data)
     returnValue = Gyroscope_readXyzValue(xdkGyroscope_BMG160_Handle, &getRawData);
     if(SENSOR_SUCCESS == returnValue)
     {
-        printf("\n%s Raw Data : x = %ld, y = %ld, z = %ld\n",
+        TRACE_PRINT("%s Raw Data : x = %ld, y = %ld, z = %ld",
                GYRO_LABEL,
                (long int)getRawData.xAxisData,
                (long int)getRawData.yAxisData,
@@ -55,14 +58,14 @@ void GyroGetData(SensorData* data)
     }
     else
     {
-        printf("%s Raw Data read FAILED\n\r", GYRO_LABEL);
+    	WARN_PRINT("%s Raw Data read FAILED", GYRO_LABEL);
     }
 
     returnValue = Gyroscope_readXyzDegreeValue(xdkGyroscope_BMG160_Handle, &getMdegData);
     if(SENSOR_SUCCESS == returnValue)
     {
         FillGyroData(data, &getMdegData);
-        printf("%s Converted Data : x = %ld mDeg, y = %ld mDeg, z = %ld mDeg\n\r",
+        TRACE_PRINT("%s Converted Data : x = %ld mDeg, y = %ld mDeg, z = %ld mDeg",
                GYRO_LABEL,
                (long int)getMdegData.xAxisData,
                (long int)getMdegData.yAxisData,
@@ -71,6 +74,6 @@ void GyroGetData(SensorData* data)
     }
     else
     {
-        printf("%s Converted Data read FAILED\n\r", GYRO_LABEL);
+        WARN_PRINT("%s Converted Data read FAILED", GYRO_LABEL);
     }
 }

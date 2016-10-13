@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include "BCDS_SensorErrorType.h"
+#include "retcode.h"
 
 #define MAX_MEASUREMENTS  (  5 )
 #define NUM_SENSORS       (  5 )
@@ -26,5 +27,5 @@ typedef Retcode_T(*SensorInitializer)(void* handle);
 extern SensorGetter sensors[];
 extern bool enabledSensors[];
 
-void SensorInit(SensorInitializer init, void* handle, const char* label);
+XDK_Retcode_E SensorInit(SensorInitializer init, void* handle, const char* label);
 void SensorDataClear(SensorData* data);

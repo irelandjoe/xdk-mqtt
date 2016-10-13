@@ -1,6 +1,9 @@
 #include "BCDS_Environmental.h"
 #include "XdkSensorHandle.h"
 #include "envdata.h"
+#include "retcode.h"
+
+#include "logging.h"
 
 static const char ENV_SENSOR_LABEL[] = "BME280 Environmental Sensor";
 
@@ -23,9 +26,9 @@ static Retcode_T EnvPrivateInit(void* handle)
     return Environmental_init((Environmental_HandlePtr_T)handle);
 }
 
-void EnvSensorInit()
+XDK_Retcode_E EnvSensorInit()
 {
-    SensorInit(&EnvPrivateInit,
+    return SensorInit(&EnvPrivateInit,
                xdkEnvironmental_BME280_Handle,
                ENV_SENSOR_LABEL);
 }
@@ -48,7 +51,7 @@ void EnvSensorGetData(SensorData* data)
     returnValue = Environmental_readDataLSB(xdkEnvironmental_BME280_Handle, &bme280lsb);
     if(SENSOR_SUCCESS == returnValue)
     {
-        printf("\n%s Raw Data : p = %ld, t = %ld, h = %ld\n",
+       TRACE_PRINT("%s Raw Data : p = %ld, t = %ld, h = %ld",
                ENV_SENSOR_LABEL,
                (long int)bme280lsb.pressure,
                (long int)bme280lsb.temperature,
@@ -57,14 +60,14 @@ void EnvSensorGetData(SensorData* data)
     }
     else
     {
-        printf("%s Raw Data read FAILED\n\r", ENV_SENSOR_LABEL);
+        WARN_PRINT("%s Raw Data read FAILED", ENV_SENSOR_LABEL);
     }
 
     returnValue = Environmental_readData(xdkEnvironmental_BME280_Handle, &bme280);
     if(SENSOR_SUCCESS == returnValue)
     {
         FillEnvData(data, &bme280);
-        printf("%s Conversion Data : p = %ld Pa, t = %ld mDeg, h = %ld %%\n\r",
+        TRACE_PRINT("%s Conversion Data : p = %ld Pa, t = %ld mDeg, h = %ld %%",
                ENV_SENSOR_LABEL,
                (long int)bme280.pressure,
                (long int)bme280.temperature,
@@ -72,6 +75,6 @@ void EnvSensorGetData(SensorData* data)
     }
     else
     {
-        printf("%s Conversion Data read FAILED\n\r", ENV_SENSOR_LABEL);
+        WARN_PRINT("%s Conversion Data read FAILED", ENV_SENSOR_LABEL);
     }
 }

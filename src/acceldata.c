@@ -1,6 +1,8 @@
 #include "BCDS_Accelerometer.h"
 #include "XdkSensorHandle.h"
 #include "acceldata.h"
+#include "logging.h"
+#include "retcode.h"
 
 static const char ACCEL_LABEL[] = "BMA280 Accelerometer";
 
@@ -22,9 +24,9 @@ static Retcode_T AccelPrivateInit(void* handle)
     return Accelerometer_init((Accelerometer_HandlePtr_T)handle);
 }
 
-void AccelInit(void)
+XDK_Retcode_E AccelInit(void)
 {
-    SensorInit(&AccelPrivateInit,
+    return SensorInit(&AccelPrivateInit,
                xdkAccelerometers_BMA280_Handle,
                ACCEL_LABEL);
 }
@@ -45,7 +47,7 @@ void AccelGetData(SensorData* data)
     returnValue = Accelerometer_readXyzLsbValue(xdkAccelerometers_BMA280_Handle, &getaccelData);
     if(SENSOR_SUCCESS == returnValue)
     {
-        printf("\n%s Raw Data : x = %ld, y = %ld, z = %ld\n",
+    	TRACE_PRINT("%s Raw Data : x = %ld, y = %ld, z = %ld",
                ACCEL_LABEL,
                (long int)getaccelData.xAxisData,
                (long int)getaccelData.yAxisData,
@@ -54,14 +56,14 @@ void AccelGetData(SensorData* data)
     }
     else
     {
-        printf("%s Raw Data read FAILED\n\r", ACCEL_LABEL);
+        WARN_PRINT("%s Raw Data read FAILED", ACCEL_LABEL);
     }
 
     returnValue = Accelerometer_readXyzGValue(xdkAccelerometers_BMA280_Handle, &getaccelData);
     if(SENSOR_SUCCESS == returnValue)
     {
         FillAccelData(data, &getaccelData);
-        printf("%s Gravity Data : x = %ld mg, y = %ld mg, z = %ld mg\n\r",
+        TRACE_PRINT("%s Gravity Data : x = %ld mg, y = %ld mg, z = %ld mg",
                ACCEL_LABEL,
                (long int)getaccelData.xAxisData,
                (long int)getaccelData.yAxisData,
@@ -70,6 +72,6 @@ void AccelGetData(SensorData* data)
     }
     else
     {
-        printf("%s Gravity Data read FAILED\n\r", ACCEL_LABEL);
+        WARN_PRINT("%s Gravity Data read FAILED", ACCEL_LABEL);
     }
 }

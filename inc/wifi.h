@@ -1,7 +1,7 @@
 #pragma once
 
-typedef void (*WifiCallback)(int status);
+#include "retcode.h"
 
-int WiFiInit(WifiCallback callback);
+XDK_Retcode_E WiFiInit(void);
 int WiFiDeinit(void);
 void WiFiPrintIP(void);

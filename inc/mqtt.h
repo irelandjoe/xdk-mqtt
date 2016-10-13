@@ -4,12 +4,13 @@
 #include <stdint.h>
 #include "sensordata.h"
 #include "MQTTClient.h"
+#include "retcode.h"
 
 typedef enum returnCode MqttErrorCode;
 
-int  MqttInit(void);
+XDK_Retcode_E  MqttInit(void);
 void MqttDeinit(void);
-int  MqttReconnect(void);
+XDK_Retcode_E  MqttReconnect(void);
 int  MqttSendData(NameValue* data);
 int  MqttSubscribe(messageHandler callback);
 void MqttYield(void* context);
