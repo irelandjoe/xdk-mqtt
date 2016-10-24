@@ -8,7 +8,7 @@
 #include "BCDS_NetworkConfig.h"
 #include <FreeRTOS.h>
 
-#if __has_include(<XdkVersion.h>)
+#ifdef WLANCONNECT_ENROLLEE_PIN
 # include <XdkVersion.h>
 #endif
 
