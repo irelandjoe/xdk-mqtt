@@ -17,7 +17,7 @@
 #define MQTT_PASSWORD "password"
 #define MQTT_CLIENTID "clientId"
 #define MQTT_TOPIC "/v1/" MQTT_USER "/"
-#define MQTT_SERVER "mqtt.relayr.io"
+#define MQTT_SERVER "192.168.100.1"
 
 
 #endif /* SRC_CREDENTIALS_H_ */

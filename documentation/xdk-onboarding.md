@@ -100,7 +100,7 @@ Follow these steps to configure the XDK with the credentials of the WiFi network
 
 1.  On the folder of the project (left vertical window), expand the "config" folder and double click on the file named `credentials.h`.
 2.  Find the fields labeled `WLAN_CONNECT_WPA_SSID` and `WLAN_CONNECT_WPA_PASS`. Enter the WiFi network and the password as shown here:
-  ![Credentials_wifi](assets/ScreenShot_2016-09-13_at_10.03.19.png)
+  ![Credentials_wifi](assets/ScreenShot_2016-11-18_at_11.41.01.png)
 3.  Once you've entered the credentials, click "File" → "Save All."
   
 ### MQTT credentials
