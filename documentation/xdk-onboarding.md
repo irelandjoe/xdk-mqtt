@@ -131,7 +131,7 @@ to the folder "config" and double click on the file `credentials.h`.
 Modify the existing data, overwriting any existing data - convert table see
 below.
 
-![Credentials](assets/ScreenShot_2016-09-13_at_10.03.19.png)
+![Credentials](assets/ScreenShot_2016-11-18_at_11.41.01.png)
    
 JSON file | credentials.h
 ------------ | -------------
