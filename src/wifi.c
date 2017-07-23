@@ -28,24 +28,24 @@ XDK_Retcode_E WiFiInit()
 
     XDK_Retcode_E retVal = XDK_RETCODE_FAILURE;
 
-#if defined(XDKVERSION_H_) && (XDKVERSION_MAJOR == 1) && (XDKVERSION_MINOR == 7)
-    NetworkConfig_IpSettings_T myIpSettings;
-#else
+#if defined(XDKVERSION_H_) && (XDKVERSION_MAJOR == 1) && (XDKVERSION_MINOR <= 6)
     NCI_ipSettings_t myIpSettings;
+#else
+    NetworkConfig_IpSettings_T myIpSettings;
 #endif
 
     memset(&myIpSettings, (uint32_t) 0, sizeof(myIpSettings));
     Ip_Address_T* IpaddressHex = Ip_getMyIpAddr();
     int8_t ipAddressMy[15] = {0};
 
-#if defined(XDKVERSION_H_) && (XDKVERSION_MAJOR == 1) && (XDKVERSION_MINOR == 7)
-    WlanConnect_SSID_T connectSSID;
-    WlanConnect_PassPhrase_T connectPassPhrase;
-    if(0 == wifiInitDone && RETCODE_OK != WlanConnect_Init())
-#else
+#if defined(XDKVERSION_H_) && (XDKVERSION_MAJOR == 1) && (XDKVERSION_MINOR <= 6)
     WLI_connectSSID_t connectSSID;
     WLI_connectPassPhrase_t connectPassPhrase;
     if(0 == wifiInitDone && WLI_SUCCESS != WLI_init())
+#else
+    WlanConnect_SSID_T connectSSID;
+    WlanConnect_PassPhrase_T connectPassPhrase;
+    if(0 == wifiInitDone && RETCODE_OK != WlanConnect_Init())
 #endif
     {
         ERR_PRINT("Error occurred initializing WLAN");
@@ -56,23 +56,22 @@ XDK_Retcode_E WiFiInit()
 
     DEBUG_PRINT("Connecting to: %s", WLAN_CONNECT_WPA_SSID);
 
-#if defined(XDKVERSION_H_) && (XDKVERSION_MAJOR == 1) && (XDKVERSION_MINOR == 7)
-    connectSSID = (WlanConnect_SSID_T) WLAN_CONNECT_WPA_SSID;
-    connectPassPhrase = (WlanConnect_PassPhrase_T) WLAN_CONNECT_WPA_PASS;
-#else
+#if defined(XDKVERSION_H_) && (XDKVERSION_MAJOR == 1) && (XDKVERSION_MINOR <= 6)
     connectSSID = (WLI_connectSSID_t) WLAN_CONNECT_WPA_SSID;
     connectPassPhrase = (WLI_connectPassPhrase_t) WLAN_CONNECT_WPA_PASS;
+#else
+    connectSSID = (WlanConnect_SSID_T) WLAN_CONNECT_WPA_SSID;
+    connectPassPhrase = (WlanConnect_PassPhrase_T) WLAN_CONNECT_WPA_PASS;
 #endif
 
-#if defined(XDKVERSION_H_) && (XDKVERSION_MAJOR == 1) && (XDKVERSION_MINOR == 7)
-    if (RETCODE_OK == WlanConnect_WPA(connectSSID, connectPassPhrase, NULL))
-    {
-
-        NetworkConfig_GetIpSettings(&myIpSettings);
-#else
+#if defined(XDKVERSION_H_) && (XDKVERSION_MAJOR == 1) && (XDKVERSION_MINOR <= 6)
     if (WLI_SUCCESS == WLI_connectWPA(connectSSID, connectPassPhrase, NULL))
     {
         NCI_getIpSettings(&myIpSettings);
+#else
+    if (RETCODE_OK == WlanConnect_WPA(connectSSID, connectPassPhrase, NULL))
+    {
+            NetworkConfig_GetIpSettings(&myIpSettings);
 #endif
         WDOG_Feed();
         *IpaddressHex = Basics_htonl(myIpSettings.ipV4);
@@ -91,29 +90,29 @@ XDK_Retcode_E WiFiInit()
 int WiFiDeinit(void)
 {
     DEBUG_PRINT("WiFi disconnect!");
-#if defined(XDKVERSION_H_) && (XDKVERSION_MAJOR == 1) && (XDKVERSION_MINOR == 7)
-    return WlanConnect_Disconnect(NULL);
-#else
+#if defined(XDKVERSION_H_) && (XDKVERSION_MAJOR == 1) && (XDKVERSION_MINOR <= 6)
     return WLI_disconnect(NULL);
+#else
+    return WlanConnect_Disconnect(NULL);
 #endif
 }
 
 void WiFiPrintIP(void)
 {
-#if defined(XDKVERSION_H_) && (XDKVERSION_MAJOR == 1) && (XDKVERSION_MINOR == 7)
-    NetworkConfig_IpSettings_T myIpSettings;
-#else
+#if defined(XDKVERSION_H_) && (XDKVERSION_MAJOR == 1) && (XDKVERSION_MINOR <= 6)
     NCI_ipSettings_t myIpSettings;
+#else
+    NetworkConfig_IpSettings_T myIpSettings;
 #endif
 
     memset(&myIpSettings, 0, sizeof(myIpSettings));
 
     Ip_Address_T* IpaddressHex = Ip_getMyIpAddr();
 
-#if defined(XDKVERSION_H_) && (XDKVERSION_MAJOR == 1) && (XDKVERSION_MINOR == 7)
-    NetworkConfig_GetIpSettings(&myIpSettings);
-#else
+#if defined(XDKVERSION_H_) && (XDKVERSION_MAJOR == 1) && (XDKVERSION_MINOR <= 6)
     NCI_getIpSettings(&myIpSettings);
+#else
+    NetworkConfig_GetIpSettings(&myIpSettings);
 #endif
     *IpaddressHex = Basics_htonl(myIpSettings.ipV4);
 
