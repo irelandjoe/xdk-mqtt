@@ -13,7 +13,7 @@ compile and onboard the XDK, and start sending data to the cloud.
 
 -  Virtual box (not necessary if you have a Windows PC)
 -  Windows (in this tutorial, Window 10 Home Edition is used)
--  [XDK Workbench release 1.6.0](http://xdk.bosch-connectivity.com/software-downloads)
+-  [XDK Workbench release 1.7.0](http://xdk.bosch-connectivity.com/software-downloads) (1.6.0 is also supported) 
 -  [relayr XDK firmware](https://github.com/relayr/xdk-mqtt)
 -  XDK serial number (for use with your Bosch account)
 

@@ -9,7 +9,7 @@ It's for Linux and MacOS skilled users.
 
 ### 2.1. List of components
 
--  XDK Workbench (version 1.6.0)
+-  XDK Workbench version 1.7.0 (version 1.6.0 is also supported) 
 -  Segger JLinkExe - https://www.segger.com/jlink-software.html (JLinkExe in PATH variable)
 -  ARM GCC - https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q3-update
 -  debug probe (currently supported: JTAG Lock Pick Tiny 2 via OpenOCD and Segger JLink)
